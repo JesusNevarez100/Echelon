@@ -31,3 +31,29 @@ paster URL into your browser
 
 # Start App
 python manage.py startapp appname
+
+
+# TODO 
+- [] Landing App
+	- [] Views/FrontEnd
+
+- [] CRM App
+	- [] Views/FrontEnd
+
+- [] Services App
+	- [] Views/FrontEnd
+
+- [] Billing App
+	- [] Views/FrontEnd
+
+- [] Scheduling Scheduling
+	- [] Views/FrontEnd
+
+- [] Messaging App
+	- [] Views/FrontEnd
+
+- [] Crypto App
+	- [] Views/FrontEnd
+	
+- [] Maybe Audit checks
+	- [] Views/FrontEnd

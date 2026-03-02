@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# Still need Billing, Scheduling, messaging, crypto, maybe audit
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("landing.urls"))
+    path("", include("landing.urls")),
+    path("services/", include("services.urls")),
+	path("crm/", include("crm.urls")),
 ]
