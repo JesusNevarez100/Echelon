@@ -29,3 +29,5 @@ python manage.py runserver
 
 paster URL into your browser
 
+# Start App
+python manage.py startapp appname
