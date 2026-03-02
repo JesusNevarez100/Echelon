@@ -33,6 +33,7 @@ class Membership(models.Model):
 	class Role(models.TextChoices):
 		ADMIN = "ADMIN", "Admin"
 		STAFF = "STAFF", "Staff"
+		MANAGER = "MANAGER", "Manager"
 		CLIENT = "CLIENT", "Client"
 	
 	membership_id = models.BigAutoField(primary_key=True)

@@ -1,9 +1,12 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import CompanyAccount, User
+from services.models import ServiceRequested
 
 # Create your models here.
+# Only company should have access to these models
 
+# Contact will be used for finding Leading and keeping track of customers
 class Contact(models.Model):
 	class ContactType(models.TextChoices):
 		CUSTOMER =  "CUSTOMER", "Customer"
@@ -23,7 +26,8 @@ class Contact(models.Model):
 
 	def __str__(self):
 		return f"{self.name} ({self.company.name})"
-	
+
+
 class Task(models.Model):
 	class Status(models.TextChoices):
 		OPEN = "OPEN", "Open"
@@ -32,6 +36,7 @@ class Task(models.Model):
 		CANCELLED = "CANCELLED", "Cancelled"
 
 	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="tasks")
+	service = models.ForeignKey(ServiceRequested, on_delete=models.CASCADE, related_name="tasks")
 	created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="tasks_created")
 	assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks_assigned")
 
