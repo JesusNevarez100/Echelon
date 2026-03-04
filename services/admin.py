@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Service, ServiceRequested
+from .models import Service, ServiceRequest
 
 
 # Register your models here.
@@ -9,7 +9,7 @@ class ServicesAdmin(admin.ModelAdmin):
 	list_filter = ("active", "company")
 	search_fields = ("name", "company__name")
 
-@admin.register(ServiceRequested)
+@admin.register(ServiceRequest)
 class ServiceRequestAdmin(admin.ModelAdmin):
 	list_display = ("service", "company", "status", "requested_by", "requested_at", "completed_at")
 	list_filter = ("service", "company")

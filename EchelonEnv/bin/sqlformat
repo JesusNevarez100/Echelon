@@ -1,6 +1,0 @@
-#!/Users/jesusnevarez/Documents/School/NMT/Classes/2026spring/CSE3026/FinalProject/Echelon/EchelonEnv311/bin/python
-import sys
-from sqlparse.__main__ import main
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(main())

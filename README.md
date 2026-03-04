@@ -120,6 +120,7 @@ python manage.py startapp appname
 	[] Models
 		[] Meeting
 			[] meetings are billable
+		[] Meeting participant
 
 
 - [] Billing App

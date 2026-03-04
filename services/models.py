@@ -15,7 +15,7 @@ class Service(models.Model):
 	def __str__(self):
 		return f"{self.name} ({self.company.name})"
 	
-class ServiceRequested(models.Model):
+class ServiceRequest(models.Model):
 	class Status(models.TextChoices):
 		REQUESTED = "REQUESTED", "Requested"
 		ACCEPTED = "ACCEPTED", "Accepted"
@@ -23,10 +23,10 @@ class ServiceRequested(models.Model):
 		COMPLETED = "COMPLETED", "Completed"
 		CANCELLED = "CANCELLED", "Cancelled"
 
-	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="service_requested")
+	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="service_request")
 	service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="requests")
 
-	requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="service_requests")
+	requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="service_request")
 	status = models.CharField(max_length=16, choices=Status.choices, default=Status.REQUESTED) 
 
 	requested_at = models.DateTimeField(default=timezone.now)
@@ -36,4 +36,3 @@ class ServiceRequested(models.Model):
 
 	def __str__(self):
 		return f"{self.service.name} -> {self.company.name} [{self.status}]"
-

@@ -40,7 +40,9 @@ INSTALLED_APPS = [
 	"accounts",
     "landing",
     "crm",
-    "services"
+    "services",
+	"billing",
+	"scheduling"
 ]
 
 MIDDLEWARE = [

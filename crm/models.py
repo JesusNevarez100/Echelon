@@ -1,7 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from accounts.models import CompanyAccount, User
-from services.models import ServiceRequested
+from services.models import ServiceRequest
 
 # Create your models here.
 # Only company should have access to these models
@@ -36,7 +37,7 @@ class Task(models.Model):
 		CANCELLED = "CANCELLED", "Cancelled"
 
 	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="tasks")
-	service = models.ForeignKey(ServiceRequested, on_delete=models.CASCADE, related_name="tasks")
+	service_request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks")
 	created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="tasks_created")
 	assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks_assigned")
 
@@ -47,7 +48,12 @@ class Task(models.Model):
 	status = models.CharField(max_length=16, choices=Status.choices, default=Status.OPEN)
 
 	created_at = models.DateTimeField(default=timezone.now)
-	due_at = models.DateTimeField(blank=True)
+	due_at = models.DateTimeField(blank=True, null=True)
+
+	def clean(self):
+		# If linked with service request enforce same company
+		if self.service_request and self.service_request.company_id != self.company_id:
+			raise ValidationError("Task.company must match ServiceRequest.company")
 
 	def __str__(self):
 		return f"{self.title} [{self.status}]"
