@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+  <div class="grid">
+    <div class="card" style="grid-column: span 6;">
+      <h1 style="margin-top:0;">Login</h1>
+      <p class="muted">Sign in to access your company workspace.</p>
+
+      {% if form.errors %}
+        <p class="error">Invalid credentials. Please try again.</p>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 12px;">
+          <label for="id_username">Username</label>
+          {{ form.username }}
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label for="id_password">Password</label>
+          {{ form.password }}
+        </div>
+
+        <button class="btn primary" type="submit">Login</button>
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+      </form>
+
+      <div style="margin-top: 14px;" class="muted">
+        <a href="/accounts/password_reset/">Forgot password?</a>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: span 6;">
+      <h2 style="margin-top:0;">Echelon</h2>
+      <p class="muted">
+        CRM foundation with security-first direction. Your admin can create accounts and assign company roles.
+      </p>
+      <a class="btn" href="/">Back to landing</a>
+    </div>
+  </div>
+{% endblock %}

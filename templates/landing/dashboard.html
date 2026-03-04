@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Echelon{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">Dashboard</h1>
+  <p class="muted">Choose a module.</p>
+
+  <div class="grid">
+    <a class="card" style="grid-column: span 6;" href="/crm/">
+      <h2 style="margin:0 0 6px 0;">CRM</h2>
+      <div class="muted">Contacts + Tasks</div>
+    </a>
+
+    <a class="card" style="grid-column: span 6;" href="/services/">
+      <h2 style="margin:0 0 6px 0;">Services</h2>
+      <div class="muted">Service catalog + Requests</div>
+    </a>
+
+    <a class="card" style="grid-column: span 6;" href="/scheduling/">
+      <h2 style="margin:0 0 6px 0;">Scheduling</h2>
+      <div class="muted">Meetings + Participants</div>
+    </a>
+
+    <a class="card" style="grid-column: span 6;" href="/billing/">
+      <h2 style="margin:0 0 6px 0;">Billing</h2>
+      <div class="muted">Invoices + Line Items</div>
+    </a>
+  </div>
+{% endblock %}

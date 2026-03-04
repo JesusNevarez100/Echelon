@@ -20,6 +20,7 @@ from django.urls import path, include
 # Still need Billing, Scheduling, messaging, crypto, maybe audit
 urlpatterns = [
     path("admin/", admin.site.urls),
+	path("accounts/", include("django.contrib.auth.urls")),
     path("", include("landing.urls")),
 	path("crm/", include("crm.urls")),
     path("services/", include("services.urls")),

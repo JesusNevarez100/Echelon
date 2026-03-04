@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}Echelon{% endblock %}</title>
+
+    <!-- Quick + decent default styling (no build tools) -->
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; background: #0b1220; color: #e6e8ee; }
+      a { color: inherit; text-decoration: none; }
+      .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+      .nav { display:flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.2); }
+      .brand { font-weight: 800; letter-spacing: .4px; }
+      .pill { display:inline-block; padding: 6px 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; font-size: 12px; opacity: .9; }
+      .btn { display:inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
+      .btn.primary { background: #4f7cff; border-color: rgba(79,124,255,.6); }
+      .btn:hover { filter: brightness(1.07); }
+      .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+      .card { border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 16px; background: rgba(255,255,255,.04); }
+      .muted { opacity:.8; }
+      .footer { opacity:.7; padding: 24px; text-align:center; border-top: 1px solid rgba(255,255,255,.08); }
+      input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.25); color: #e6e8ee; }
+      label { display:block; margin-bottom: 6px; opacity: .9; }
+      .error { color: #ff8a8a; }
+      .row { display:flex; gap: 10px; flex-wrap: wrap; }
+    </style>
+  </head>
+
+  <body>
+    <div class="nav">
+      <div>
+        <a class="brand" href="/">ECHELON</a>
+        <span class="pill" style="margin-left:10px;">E2E Encrypted CRM</span>
+      </div>
+
+      <div class="row">
+        {% if user.is_authenticated %}
+          <a class="btn" href="/app/">App</a>
+          <a class="btn" href="/accounts/logout/">Logout</a>
+        {% else %}
+          <a class="btn" href="/accounts/login/">Login</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <div class="footer">
+      <div class="muted">Echelon — secure CRM foundation (MVP)</div>
+    </div>
+  </body>
+</html>

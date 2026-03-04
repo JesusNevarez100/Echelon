@@ -122,7 +122,6 @@ python manage.py startapp appname
 			[] meetings are billable
 		[] Meeting participant
 
-
 - [] Billing App
 	Invoices will be created by scanning complete requested services, and complete meetings to sum a bill.
 	[] Views/FrontEnd
