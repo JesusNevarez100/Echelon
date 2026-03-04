@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Echelon{% endblock %}
+
+{% block content %}
+<div class="grid" style="align-items: start;">
+    <div class="card" style="grid-column: span 7;">
+     	<h1 style="margin-top:0; font-size: 42px; line-height: 1.1;">
+			All Services
+		</h1>
+		<div class="card" style="grid-column: span 5;">
+			{% if services %}
+				{% for service in services  %}
+					{% comment %} Put this in a card {% endcomment %}
+					{% comment %} {% endcomment %}
+					<p>{{service.name}}</p>
+					</br>
+				{% endfor %}
+			{% else %}
+				<p>No Services</p>
+			{% endif %}
+		</div>
+	</div>
+	{% comment %} HIDE FROM CIENTS {% endcomment %}
+	<div class="card" style="grid-column: span 5;">
+	  <h2 style="margin-top:0;">What you can do</h2>
+	  <ul class="muted">
+		{% comment %} Add a way to create services {% endcomment %}
+		<p>Create services</p>
+	  </ul>
+
+	  <div class="card" style="margin-top:16px;">
+		<div class="muted">
+		  <strong>Security direction:</strong> messages/files stored as ciphertext only, with retention controls.
+		</div>
+	  </div>
+	</div>
+</div>
+	
+{% endblock%}

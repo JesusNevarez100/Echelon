@@ -6,6 +6,7 @@ from . import views
 app_name = "services"
 
 urlpatterns = [
-	path("", views.index, name="index")
+	path("", views.index, name="index"),
+	path("all/", views.displayServices, name="all")
 ]
 
