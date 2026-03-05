@@ -19,5 +19,5 @@ def displayServices(request, company_id):
     })
 
 def allServices(request):
-    service = Service.object.all()
+    service = Service.objects.all()
     return render(request, "services/allServices.html")
