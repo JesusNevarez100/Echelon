@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Services{% endblock %}
+
+{% block content %}
+<div class="grid" style="align-items: start;">
+    <!-- Main Services Table -->
+    <div class="card" style="grid-column: span 7;">
+        <h1 style="margin-top:0; font-size: 42px; line-height: 1.1;">
+			All Services for {{ company.name }}
+		</h1>
+
+        <div class="card" style="margin-top:16px; overflow-x:auto;">
+            {% if services %}
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in services %}
+                        <tr>
+                            <td>{{ service.name }}</td>
+                            <td>{{ service.description }}</td>
+                            <td>
+                                {% if service.active %}
+                                    <span class="status active">Active</span>
+                                {% else %}
+                                    <span class="status inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>${{ service.base_price_cents|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No Services</p>
+            {% endif %}
+        </div>
+    </div>
+<style>
+/* Table Styling */
+.services-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e6e8ee;
+    font-size: 14px;
+}
+.services-table th, .services-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.services-table th {
+    background: rgba(255,255,255,.05);
+    font-weight: 600;
+}
+.services-table tbody tr:hover {
+    background: rgba(79,124,255,.1);
+}
+.status {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+.status.active {
+    color: #4fffc3;
+}
+.status.inactive {
+    color: #ff6b6b;
+}
+</style>
+{% endblock %}

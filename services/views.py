@@ -17,3 +17,7 @@ def displayServices(request, company_id):
         "services": services,
         "company": company
     })
+
+def allServices(request):
+    service = Service.object.all()
+    return render(request, "services/allServices.html")
