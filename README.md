@@ -20,7 +20,8 @@ The project will be started in a virtual environment. This is to isolate all of 
 make sure you install django after setting up the virtual environment using
 	python install Django
 
-# Admin Credentials
+# Admin Creation + Credentials
+python manage.py createsuperuser
 Username: Admin
 Password: Password!23
 
