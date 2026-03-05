@@ -4,6 +4,11 @@
 {% block content %}
   <h1 style="margin-top:0;">Dashboard</h1>
   <p class="muted">Choose a module.</p>
+  {% if user.is_authenticated %}
+    <div style="margin: 16px 0;">
+      <a class="btn" href="/apps/accounts/create-user/">Create User</a>
+    </div>
+  {% endif %}
 
   <div class="grid">
     <a class="card" style="grid-column: span 6;" href="/crm/">

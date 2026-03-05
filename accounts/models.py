@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+import uuid
+
 # Create your models here.
 class User(AbstractUser):
 	"""
@@ -21,8 +23,10 @@ class User(AbstractUser):
 
 	email = models.EmailField(unique=True)
 
+	must_change_password = models.BooleanField(default=False)
+
 class CompanyAccount(models.Model):
-	company_id=models.UUIDField(primary_key=True, editable=False)
+	company_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255, unique=True)
 	created_at = models.DateTimeField(default=timezone.now)
 

@@ -32,6 +32,8 @@ paster URL into your browser
 # Start App
 python manage.py startapp appname
 
+# Workflow
+Admin creates Company account and links all associated accounts through admin
 
 # Permissions
 ### Admin 

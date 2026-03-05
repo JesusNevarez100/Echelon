@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}User Created{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">User Created</h1>
+  <p class="muted">Company: {{ company.name }} • Role: {{ role }}</p>
+
+  <div class="card" style="max-width: 720px;">
+    <p><strong>Temporary credentials (show once):</strong></p>
+    <p><strong>Username:</strong> <code>{{ temp_username }}</code></p>
+    <p><strong>Password:</strong> <code>{{ temp_password }}</code></p>
+
+    <p class="muted" style="margin-top:12px;">
+      They will be forced to change their password on first login.
+    </p>
+
+    <div class="row" style="margin-top:14px;">
+      <a class="btn primary" href="/app/">Back to App</a>
+      <a class="btn" href="/app/accounts/create-user/">Create another</a>
+    </div>
+  </div>
+{% endblock %}
