@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+import uuid
 
 import uuid
 
@@ -26,12 +27,15 @@ class User(AbstractUser):
 	must_change_password = models.BooleanField(default=False)
 
 class CompanyAccount(models.Model):
-	company_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	name = models.CharField(max_length=255, unique=True)
-	created_at = models.DateTimeField(default=timezone.now)
-
-	def __str__(self) -> str:
-		return self.name
+    company_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    def __str__(self) -> str:
+        return self.name
 	
 class Membership(models.Model):
 	class Role(models.TextChoices):
