@@ -94,6 +94,11 @@ Admin creates Company account and links all associated accounts through admin
 		Tasks created under services
 		[] Display Tasks assigned to user
 		[] Display users contacts
+		[] DisplayTask/Contact.html
+		[] Task/ContactDisplay.html
+			[] All details about about a certain service
+			[] In here is where users with correct permissions can modify or remove
+		[] CreateTask/Contact.html
 	[x] Models
 		[x] Tasks
 		[x] Contact
@@ -111,6 +116,12 @@ Admin creates Company account and links all associated accounts through admin
 			[] Requests Services
 			[] Is Assigned Tasks
 			[] Views progress
+		[] DisplayServices.html
+		[] ServiceDetail.html
+			[] All details about about a certain service
+			[] In here is where users with correct permissions can modify or remove
+			[] Where clients can request a service
+		[] CreateService.html
 	[x] Models
 		[x] Services
 		[x] Requested Services 
@@ -120,6 +131,12 @@ Admin creates Company account and links all associated accounts through admin
 		[] Schedule meeting
 		[] Edit meeting
 		[] Cancel Meeting
+		[] DisplayMeetings.html
+		[] MeetingsDetail.html
+			[] All details about about a certain service
+			[] In here is where users with correct permissions can modify or remove
+			[] Where clients/companies can schedule a meeting
+		[] CreateMeeting.html
 	[] Models
 		[] Meeting
 			[] meetings are billable
@@ -131,7 +148,13 @@ Admin creates Company account and links all associated accounts through admin
 		[] Create invoice
 		[] Delete invoice
 		[] Take payment (Optional)
-		[] Display current meetings 
+		[] Display current meetings
+		[] DisplayInvoice.html
+		[] InvoiceDetail.html
+			[] All details about about a certain service
+			[] In here is where users with correct permissions can modify or remove
+			[] Where clients can pay their bill
+		[] CreateInvoice.html
 	[] Models
 		[] Invoice
 		[] Paid Invoice
