@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from accounts.views import ForcePasswordChangeView
 
 # Still need Billing, Scheduling, messaging, crypto, maybe audit
 urlpatterns = [
@@ -27,4 +29,16 @@ urlpatterns = [
     path("services/", include("services.urls")),
 	path("scheduling/", include("scheduling.urls")),
 	path("billing/", include("billing.urls")),
+	
+    path(
+		"password-change/",
+		ForcePasswordChangeView.as_view(),
+		name="password_change"
+	),
+
+	path(
+		"password-change/done/",
+		auth_views.PasswordChangeDoneView.as_view(),
+		name="password_change_done"
+	)
 ]

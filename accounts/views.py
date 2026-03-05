@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
+from django.urls import reverse_lazy
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 
@@ -9,6 +11,20 @@ from accounts.utils import create_temp_password, create_temp_username
 
 
 # Create your views here.
+
+class ForcePasswordChangeView(PasswordChangeView):
+	template_name = "registration/password_change_form.html"
+	success_url = reverse_lazy("password_change_done")
+
+	def form_valid(self, form):
+		response = super().form_valid(form)
+
+		user = self.request.user
+		if user.must_change_password:
+			user.must_change_password = False
+			user.save(update_fields=["must_change_password"])
+		return response
+
 @login_required
 def create_company_user(request):
 	membership = get_primary_membership(request.user)
