@@ -14,6 +14,13 @@
       <form method="post">
         {% csrf_token %}
 
+        <style>
+          #id_username,
+          #id_password {
+          width: 400px;
+        }
+      </style>
+
         <div style="margin-bottom: 12px;">
           <label for="id_username">Username</label>
           {{ form.username }}
