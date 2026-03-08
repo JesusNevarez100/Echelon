@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    /*separates colunms*/
+    .layout {
+        display: grid;
+        grid-template-columns: 500px 1fr;
+        gap: 50px;
+        align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* card styling */
+    .card {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .profile-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .profile-card h2 {
+        margin: 0 0 6px 0;
+    }
+
+    .block-title {
+        margin-top: 0;
+    }
+</style>
+
+<h1 style="margin-top:0;">Dashboard</h1>
+<p class="muted">Overview of your activity.</p>
+
+<div class="layout">
+
+    <!-- left column -->
+    <div class="left-column">
+
+        <div class="card">
+            <a class="profile-card" href="/crm/">
+                <h2>CRM</h2>
+                <div class="muted">Contacts + Tasks</div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="profile-card" href="/services/">
+                <h2>Services</h2>
+                <div class="muted">Service catalog + Requests</div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="profile-card" href="/scheduling/">
+                <h2>Scheduling</h2>
+                <div class="muted">Meetings + Participants</div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="profile-card" href="/billing/">
+                <h2>Billing</h2>
+                <div class="muted">Invoices + Line Items</div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- right column -->
+    <div class="right-column">
+
+        <div class="card">
+            <h3 class="block-title">Stats (Display test)</h3>
+            <div class="chart">
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 65%"></div>
+                <div class="bar" style="height: 30%"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="block-title">Performance Graph (Display Test)</h3>
+            <svg width="300" height="150" class="line-chart">
+                <polyline fill="none" stroke="#4e79ff" stroke-width="3"
+                    points="0,120 50,80 100,100 150,40 200,60 250,20 300,50" />
+            </svg>
+        </div>
+
+        <div class="card">
+            <h3 class="block-title">Donut Chart (Display test)</h3>
+            <div class="donut-chart" style="--p: 45"></div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
