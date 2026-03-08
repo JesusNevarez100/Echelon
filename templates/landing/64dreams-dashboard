@@ -4,7 +4,6 @@
 {% block content %}
 
 <style>
-    /*separates colunms*/
     .layout {
         display: grid;
         grid-template-columns: 500px 1fr;
@@ -19,7 +18,6 @@
         gap: 15px;
     }
 
-    /* card styling */
     .card {
         padding: 18px;
         border-radius: 12px;
@@ -45,44 +43,22 @@
 
 <div class="layout">
 
-    <!-- left column -->
+    <!-- LEFT COLUMN -->
     <div class="left-column">
-
+        {% for card in cards %}
         <div class="card">
-            <a class="profile-card" href="/crm/">
-                <h2>CRM</h2>
-                <div class="muted">Contacts + Tasks</div>
+            <a class="profile-card" href="{{ card.url }}">
+                <h2>{{ card.name }}</h2>
+                <div class="muted">{{ card.desc }}</div>
             </a>
         </div>
-
-        <div class="card">
-            <a class="profile-card" href="/services/">
-                <h2>Services</h2>
-                <div class="muted">Service catalog + Requests</div>
-            </a>
-        </div>
-
-        <div class="card">
-            <a class="profile-card" href="/scheduling/">
-                <h2>Scheduling</h2>
-                <div class="muted">Meetings + Participants</div>
-            </a>
-        </div>
-
-        <div class="card">
-            <a class="profile-card" href="/billing/">
-                <h2>Billing</h2>
-                <div class="muted">Invoices + Line Items</div>
-            </a>
-        </div>
-
+        {% endfor %}
     </div>
 
-    <!-- right column -->
+    <!-- RIGHT COLUMN -->
     <div class="right-column">
 
         <div class="card">
-            <h3 class="block-title">Stats (Display test)</h3>
             <div class="chart">
                 <div class="bar" style="height: 80%"></div>
                 <div class="bar" style="height: 50%"></div>
