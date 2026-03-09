@@ -47,10 +47,23 @@
     <div class="left-column">
         {% for card in cards %}
         <div class="card">
-            <a class="profile-card" href="{{ card.url }}">
-                <h2>{{ card.name }}</h2>
-                <div class="muted">{{ card.desc }}</div>
-            </a>
+            <h2>{{ card.name }}</h2>
+            <p>{{ card.desc }}</p>
+
+            {% for section in card.sections %}
+            <h4>{{ section.title }}</h4>
+            <ul>
+                {% for item in section.items %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+
+            <div class="actions">
+                {% for action in card.actions %}
+                <a href="{{ action.url }}" class="btn">{{ action.label }}</a>
+                {% endfor %}
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -59,12 +72,11 @@
     <div class="right-column">
 
         <div class="card">
-            <div class="chart">
-                <div class="bar" style="height: 80%"></div>
-                <div class="bar" style="height: 50%"></div>
-                <div class="bar" style="height: 65%"></div>
-                <div class="bar" style="height: 30%"></div>
-            </div>
+            <h3 class="chart">Graphs will be added in the future</h3>
+            <div class="bar" style="height: 80%"></div>
+            <div class="bar" style="height: 50%"></div>
+            <div class="bar" style="height: 65%"></div>
+            <div class="bar" style="height: 30%"></div>
         </div>
 
         <div class="card">
