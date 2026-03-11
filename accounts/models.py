@@ -4,7 +4,6 @@ from django.utils import timezone
 import uuid
 
 # Create your models here.
->>>>>>> f808a66 (create service, changed landing for services, and fix base_price)
 class User(AbstractUser):
     """
     Custom user model. Keep username for simplicity initially,
