@@ -1,71 +1,74 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.utils import timezone
 import uuid
 
-import uuid
 
-# Create your models here.
 class User(AbstractUser):
-	"""
-	Custom user model. Keep username for simplicity initially, 
-	switch to e-mail log in later
-	"""
-	class Status(models.TextChoices):
-		ACTIVE = "ACTIVE", "Active"
-		SUSPENDED = "SUSPENDED", "Suspended"
-		DELETED = "DELETED", "Deleted"
+    """
+    Custom user model. Keep username for simplicity initially,
+    switch to e-mail log in later.
+    """
 
-	status = models.CharField(
-		max_length=16,
-		choices=Status.choices,
-		default=Status.ACTIVE
-	)
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", "Active"
+        SUSPENDED = "SUSPENDED", "Suspended"
+        DELETED = "DELETED", "Deleted"
 
-	email = models.EmailField(unique=True)
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
 
-	must_change_password = models.BooleanField(default=False)
+    email = models.EmailField(unique=False)
+
+    must_change_password = models.BooleanField(default=False)
+    must_change_profile = models.BooleanField(default=False)
+
 
 class CompanyAccount(models.Model):
     company_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
-        editable=False
+        editable=False,
     )
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
+
     def __str__(self) -> str:
         return self.name
-	
+
+
 class Membership(models.Model):
-	class Role(models.TextChoices):
-		ADMIN = "ADMIN", "Admin"
-		STAFF = "STAFF", "Staff"
-		MANAGER = "MANAGER", "Manager"
-		CLIENT = "CLIENT", "Client"
-	
-	membership_id = models.BigAutoField(primary_key=True)
+    class Role(models.TextChoices):
+        ADMIN = "ADMIN", "Admin"
+        STAFF = "STAFF", "Staff"
+        MANAGER = "MANAGER", "Manager"
+        CLIENT = "CLIENT", "Client"
 
-	user = models.ForeignKey(
-		User,
-		on_delete=models.CASCADE,
-		related_name="memberships",
-	)
-	company = models.ForeignKey(
-		CompanyAccount,
-		on_delete=models.CASCADE,
-		related_name="memberships"
-	)
-	role = models.CharField(
-		max_length=10,
-		choices=Role.choices,
-		default=Role.CLIENT
-	)
+    membership_id = models.BigAutoField(primary_key=True)
 
-	created_at = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    company = models.ForeignKey(
+        CompanyAccount,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    role = models.CharField(
+        max_length=10,
+        choices=Role.choices,
+        default=Role.CLIENT,
+    )
 
-	class Meta:
-		unique_together = ("user", "company")
+    created_at = models.DateTimeField(default=timezone.now)
 
-	def __str__(self) -> str:
-		return f"{self.user.username} @ {self.company.name} ({self.role})"
+    class Meta:
+        unique_together = ("user", "company")
+
+    def __str__(self) -> str:
+        return f"{self.user.username} @ {self.company.name} ({self.role})"

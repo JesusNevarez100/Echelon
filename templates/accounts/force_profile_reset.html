@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Reset Credentials{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top: 0;">Reset Credentials</h1>
+  <p class="muted">This is required on first login before you can use the app. Update username, email, and password below.</p>
+
+  <div class="card" style="max-width: 560px;">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn primary" type="submit">Save and Continue</button>
+      <a class="btn" href="/accounts/logout/">Logout</a>
+    </form>
+  </div>
+{% endblock %}
