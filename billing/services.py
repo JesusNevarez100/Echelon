@@ -23,16 +23,12 @@ def bill_meeting(meeting: Meeting) -> Invoice:
 
     InvoiceLineItem.objects.create(
         invoice=invoice,
-        description=f"Meeting: {meeting.title} ({meeting.start_at:%Y-%m-%d})",
+        description=f"Meeting with {meeting.company.name} ({meeting.start_at:%Y-%m-%d})",
         qty=1,
         unit_price_cents=amount_cents,
     )
 
     invoice.recalc_totals()
     invoice.save()
-
-    meeting.invoice = invoice
-    meeting.billed_at = timezone.now()
-    meeting.save(update_fields=["invoice", "billed_at"])
 
     return invoice

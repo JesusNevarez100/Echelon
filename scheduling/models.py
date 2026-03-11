@@ -8,6 +8,17 @@ class Meeting(models.Model):
 	class BillingType(models.TextChoices):
 		HOURLY = "HOURLY", "Hourly"
 		FLAT = "FLAT", "Flat fee"
+	
+	class Status(models.TextChoices):
+		ACTIVE = "ACTIVE", "Active",
+		FINISHED = "FINISHED","Finished"
+		CANCELED = "CANCELED", "Canceled"
+
+	status = models.CharField(
+		max_length=10,
+		choices=Status.choices,
+		default=Status.ACTIVE
+	)
 
 	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="meeting")
 	organizer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="meetings_organizer")
@@ -30,14 +41,6 @@ class Meeting(models.Model):
 	bill_rate_cents = models.BigIntegerField(blank=True, null=True)
 	billable_minutes_override = models.PositiveIntegerField(blank=True, null=True)
 
-	invoice = models.ForeignKey(
-		"billing.Invoice",
-		on_delete=models.SET_NULL,
-		null=True,
-		blank=True,
-		related_name="meetings"
-	)
-	billed_at = models.DateTimeField(blank=True, null=True)
 	def duration_minutes(self) -> int:
 		delta = self.end_at - self.start_at
 		return max(0, int(delta.total_seconds() // 60))
