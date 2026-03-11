@@ -1,11 +1,144 @@
-<!doctype html>
+{% extends "base.html" %}
 
-<html>
-	<head><title>Scheduling</title></head>
-	<body>
-		<h1>Scheduling</h1>
-		<p>Manage meetings in <a href="/admin/"> admin</a> for now. </p>
-		<p><a href="/">Return home.</a></p>
-	</body>
-</html>
+{% block content %}
 
+<!-- FullCalendar (This displays the calendar) -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<div id="calendar"></div>
+
+
+<!-- The modal for meeting creation -->
+
+<div id="createMeetingModal" class="custom-modal hidden">
+	<div class="custom-modal-content">
+		<span class="close-btn">&times;</span>
+
+		<h3>Create Meeting</h3>
+
+		<form id="meetingForm">
+			<label>Meeting Subject</label>
+			<input type="text" id="meetingTitle" required>
+
+			<label>Start Time</label>
+			<input type="datetime-local" id="meetingStart" required>
+
+			<label>End Time</label>
+			<input type="datetime-local" id="meetingEnd" required>
+
+			<label>Attendees</label>
+			<input type="text" id="meetingAttendees">
+
+			<button type="button" id="saveMeetingBtn">Save Meeting</button>
+		</form>
+	</div>
+</div>
+
+<!-- This is for how the modal displays -->
+
+<style>
+	.custom-modal {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 9999;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	.custom-modal-content {
+		background: #0b1220;
+		padding: 20px;
+		border-radius: 8px;
+		width: 380px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	.custom-modal-content input {
+		width: 100%;
+		margin-bottom: 12px;
+		padding: 8px;
+	}
+
+	.close-btn {
+		float: right;
+		font-size: 22px;
+		cursor: pointer;
+	}
+</style>
+
+
+<!-- Modal calendar interaction (not fully functional) -->
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+
+		/* Modal logic */
+		const modal = document.getElementById("createMeetingModal");
+		const closeBtn = document.querySelector(".close-btn");
+
+		function openModal() {
+			modal.classList.remove("hidden");
+		}
+
+		function closeModal() {
+			modal.classList.add("hidden");
+		}
+
+		closeBtn.onclick = closeModal;
+
+		window.onclick = function (e) {
+			if (e.target === modal) closeModal();
+		};
+
+		/*FullCalendar Setup*/
+		const calendarEl = document.getElementById("calendar");
+
+		const calendar = new FullCalendar.Calendar(calendarEl, {
+			initialView: "dayGridMonth",
+			selectable: true,
+			events: "/api/meetings/",
+
+			select(info) {
+				document.getElementById("meetingStart").value = info.startStr + "T09:00";
+				document.getElementById("meetingEnd").value = info.endStr + "T10:00";
+				document.getElementById("meetingTitle").value = "";
+				document.getElementById("meetingAttendees").value = "";
+
+				openModal();
+			}
+		});
+
+		calendar.render();
+
+		/*Save Meeting (not fully working)*/
+		document.getElementById("saveMeetingBtn").addEventListener("click", function () {
+			const title = document.getElementById("meetingTitle").value;
+			const start = document.getElementById("meetingStart").value;
+			const end = document.getElementById("meetingEnd").value;
+			const attendees = document.getElementById("meetingAttendees").value;
+
+			fetch("/api/meetings/create/", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ title, start, end, attendees }),
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.status === "ok") {
+						calendar.refetchEvents();
+						closeModal();
+					}
+				});
+		});
+
+	});
+</script>
+
+{% endblock %}
