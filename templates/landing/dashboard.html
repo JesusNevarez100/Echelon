@@ -2,7 +2,7 @@
 {% block title %}Echelon{% endblock %}
 
 {% block content %}
-  <h1 style="margin-top:0;">Dashboard</h1>
+  <h1 style="margin-top:0;">Welcome {{ request.user.username}}</h1>
   <p class="muted">Choose a module.</p>
   {% if user.is_authenticated %}
     <div style="margin: 16px 0;">

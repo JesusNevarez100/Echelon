@@ -12,6 +12,20 @@ class CreateCompanyUserForm(forms.Form):
     ## Email not needed for created account; it is collected later in the reset details.
     # email = forms.EmailField(required=False)
 
+    def __init__(self, *args, allowed_roles=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        role_choices = set(Membership.Role.choices)
+        if allowed_roles is not None:
+            allowed_roles = set(allowed_roles)
+            role_choices = [
+                (value, label)
+                for value, label in role_choices
+                if value in allowed_roles
+            ]
+        self.fields["role"].choices = role_choices
+        
+
 
 class ForceProfileResetForm(forms.Form):
     username = forms.CharField(max_length=150)

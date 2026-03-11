@@ -82,8 +82,17 @@ def create_company_user(request):
     membership = get_primary_membership(request.user)
     if not membership:
         return HttpResponseForbidden("No company membership recognized.")
+    MSR = Membership.Role
+    allowed_roles = []
+    if membership.role == MSR.ADMIN:
+        allowed_roles = [MSR.ADMIN.value, MSR.MANAGER.value, MSR.STAFF.value, MSR.CLIENT.value]
+    elif membership.role == MSR.MANAGER:
+        allowed_roles = [MSR.MANAGER.value, MSR.STAFF.value, MSR.CLIENT.value]
+    elif membership.role == MSR.STAFF:
+        allowed_roles = [MSR.STAFF.value, MSR.CLIENT.value]
+    
     if request.method == "POST":
-        form = CreateCompanyUserForm(request.POST)
+        form = CreateCompanyUserForm(request.POST, allowed_roles=allowed_roles)
         if form.is_valid():
             target_role = form.cleaned_data["role"]
 
@@ -124,7 +133,7 @@ def create_company_user(request):
             )
 
     else:
-        form = CreateCompanyUserForm()
+        form = CreateCompanyUserForm(allowed_roles=allowed_roles)
 
     return render(
         request,
