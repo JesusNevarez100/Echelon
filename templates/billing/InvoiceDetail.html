@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice #{{ invoice.id }}{% endblock %}
+
+{% block content %}
+  <div class="row" style="justify-content: space-between; align-items: center;">
+    <div>
+      <h1 style="margin-bottom: 8px;">Invoice #{{ invoice.id }}</h1>
+      <p class="muted" style="margin: 0;">{{ invoice.company.name }} | {{ invoice.get_status_display }}</p>
+    </div>
+    <a class="btn" href="{% url 'billing:display_invoices' %}">Back to invoices</a>
+  </div>
+
+  <div class="grid" style="margin-top: 16px;">
+    <section class="card" style="grid-column: span 6;">
+      <h3 style="margin-top: 0;">Billing Info</h3>
+      <p><strong>Client:</strong> {{ invoice.client.username|default:"-" }}</p>
+      <p><strong>Issued:</strong> {{ invoice.issued_at|date:"Y-m-d H:i" }}</p>
+      <p><strong>Due:</strong> {{ invoice.due_at|date:"Y-m-d H:i"|default:"-" }}</p>
+      <p><strong>Paid:</strong> {{ invoice.paid_at|date:"Y-m-d H:i"|default:"-" }}</p>
+      <p><strong>Service Request ID:</strong> {{ invoice.service_requested_id|default:"-" }}</p>
+    </section>
+
+    <section class="card" style="grid-column: span 6;">
+      <h3 style="margin-top: 0;">Totals</h3>
+      <p><strong>Subtotal:</strong> {{ invoice.subtotal_cents }} cents</p>
+      <p><strong>Tax:</strong> {{ invoice.tax_cents }} cents</p>
+      <p><strong>Total:</strong> {{ invoice.total_cents }} cents</p>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top: 16px;">
+    <h3 style="margin-top: 0;">Line Items</h3>
+
+    {% if line_items %}
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,.12);">
+            <th style="padding: 10px 8px;">Description</th>
+            <th style="padding: 10px 8px;">Quantity</th>
+            <th style="padding: 10px 8px;">Unit Price (cents)</th>
+            <th style="padding: 10px 8px;">Line Total (cents)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line_item in line_items %}
+            <tr style="border-bottom: 1px solid rgba(255,255,255,.08);">
+              <td style="padding: 10px 8px;">{{ line_item.description }}</td>
+              <td style="padding: 10px 8px;">{{ line_item.qty }}</td>
+              <td style="padding: 10px 8px;">{{ line_item.unit_price_cents }}</td>
+              <td style="padding: 10px 8px;">{{ line_item.line_total_cents }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted" style="margin-bottom: 0;">No line items on this invoice.</p>
+    {% endif %}
+  </section>
+{% endblock %}

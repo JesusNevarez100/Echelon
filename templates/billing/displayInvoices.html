@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block content %}
+  <h1>Invoices</h1>
+  <p class="muted">
+    Company: {{ membership.company.name }}
+    {% if is_client %}
+      | Showing your sent and paid invoices.
+    {% else %}
+      | Showing draft, sent, paid, and voided invoices.
+    {% endif %}
+  </p>
+
+  {% if invoices %}
+    <div class="card" style="overflow-x: auto; margin-top: 16px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,.12);">
+            <th style="padding: 10px 8px;">Invoice</th>
+            <th style="padding: 10px 8px;">Client</th>
+            <th style="padding: 10px 8px;">Status</th>
+            <th style="padding: 10px 8px;">Total (cents)</th>
+            <th style="padding: 10px 8px;">Issued</th>
+            <th style="padding: 10px 8px;">Paid</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for invoice in invoices %}
+            <tr style="border-bottom: 1px solid rgba(255,255,255,.08);">
+              <td style="padding: 10px 8px;">
+                <a href="{% url 'billing:invoice_detail' invoice.id %}">#{{ invoice.id }}</a>
+              </td>
+              <td style="padding: 10px 8px;">{{ invoice.client.username|default:"-" }}</td>
+              <td style="padding: 10px 8px;">{{ invoice.get_status_display }}</td>
+              <td style="padding: 10px 8px;">{{ invoice.total_cents }}</td>
+              <td style="padding: 10px 8px;">{{ invoice.issued_at|date:"Y-m-d H:i" }}</td>
+              <td style="padding: 10px 8px;">{{ invoice.paid_at|date:"Y-m-d H:i"|default:"-" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card" style="margin-top: 16px;">
+      <p class="muted" style="margin: 0;">No invoices found for your access level.</p>
+    </div>
+  {% endif %}
+{% endblock %}
