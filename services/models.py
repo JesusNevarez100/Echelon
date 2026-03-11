@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import CompanyAccount, User
+from decimal import Decimal
 
 # Create your models here.
 class Service(models.Model):
@@ -8,13 +9,13 @@ class Service(models.Model):
 	name = models.CharField(max_length=255)
 	description = models.TextField(blank=True)
 	active = models.BooleanField(default=True)
-	base_price_cents = models.BigIntegerField(default=0)
+	base_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	created_at = models.DateTimeField(default=timezone.now)
 
 	def __str__(self):
 		return f"{self.name} ({self.company.name})"
-	
+
 class ServiceRequest(models.Model):
 	class Status(models.TextChoices):
 		REQUESTED = "REQUESTED", "Requested"

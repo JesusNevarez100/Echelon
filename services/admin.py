@@ -5,7 +5,7 @@ from .models import Service, ServiceRequest
 # Register your models here.
 @admin.register(Service)
 class ServicesAdmin(admin.ModelAdmin):
-	list_display = ("name", "company", "active", "base_price_cents", "created_at")
+	list_display = ("name", "company", "active", "base_price", "created_at")
 	list_filter = ("active", "company")
 	search_fields = ("name", "company__name")
 
