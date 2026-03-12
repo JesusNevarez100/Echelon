@@ -1,10 +1,13 @@
-from django.utils import timezone
 from billing.models import Invoice, InvoiceLineItem
 from scheduling.models import Meeting, compute_meeting_charge_cents
 
 def check_invoice(instance, client, message, price) -> Invoice:
-    drafted_invoice = Invoice.objects.filter(client=instance.requested_by, status=Invoice.Status.DRAFT)
-    if not drafted_invoice.exists():
+    drafted_invoice = Invoice.objects.filter(
+        company=instance.company,
+        client=client,
+        status=Invoice.Status.DRAFT,
+    ).first()
+    if drafted_invoice is None:
         invoice = Invoice.objects.create(
             company=instance.company,
             client=client,
@@ -22,6 +25,9 @@ def check_invoice(instance, client, message, price) -> Invoice:
         unit_price_cents=price,
     )
 
+    invoice.recalc_totals()
+    invoice.save(update_fields=["subtotal_cents", "total_cents"])
+
     return invoice
 
 def bill_meeting(meeting: Meeting) -> Invoice:
@@ -38,10 +44,7 @@ def bill_meeting(meeting: Meeting) -> Invoice:
         raise ValueError("Billable meeting has no charge (check rate/type).")
 
     message = f"Meeting with {meeting.company.name} ({meeting.start_at:%Y-%m-%d})"
-    client = meeting.req
+    client = meeting.client
     invoice = check_invoice(meeting, client, message, amount_cents)
-
-    invoice.recalc_totals()
-    invoice.save()
 
     return invoice

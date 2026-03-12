@@ -35,7 +35,7 @@ class Invoice(models.Model):
 	def recalc_totals(self) -> None:
 		subtotal = sum(li.line_total_cents for li in self.line_items.all())
 		self.subtotal_cents = subtotal
-		self.total_cent = subtotal + (self.tax_cents or 0)
+		self.total_cents = subtotal + (self.tax_cents or 0)
 
 class InvoiceLineItem(models.Model):
 	invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="line_items")

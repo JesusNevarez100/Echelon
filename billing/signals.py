@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from billing.models import Invoice, InvoiceLineItem
 from services.models import ServiceRequest
@@ -30,5 +30,16 @@ def create_service_invoice_on_completion(sender, instance: ServiceRequest, creat
     message=f"Service: {service.name}"
     invoice = check_invoice(instance, instance.requested_by, message, service.base_price)
 
+
+@receiver(post_save, sender=InvoiceLineItem)
+def sync_invoice_totals_on_lineitem_save(sender, instance: InvoiceLineItem, **kwargs):
+    invoice = instance.invoice
     invoice.recalc_totals()
-    invoice.save()
+    invoice.save(update_fields=["subtotal_cents", "total_cents"])
+
+
+@receiver(post_delete, sender=InvoiceLineItem)
+def sync_invoice_totals_on_lineitem_delete(sender, instance: InvoiceLineItem, **kwargs):
+    invoice = instance.invoice
+    invoice.recalc_totals()
+    invoice.save(update_fields=["subtotal_cents", "total_cents"])
