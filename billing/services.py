@@ -2,6 +2,28 @@ from django.utils import timezone
 from billing.models import Invoice, InvoiceLineItem
 from scheduling.models import Meeting, compute_meeting_charge_cents
 
+def check_invoice(instance, client, message, price) -> Invoice:
+    drafted_invoice = Invoice.objects.filter(client=instance.requested_by, status=Invoice.Status.DRAFT)
+    if not drafted_invoice.exists():
+        invoice = Invoice.objects.create(
+            company=instance.company,
+            client=client,
+            status=Invoice.Status.DRAFT,
+            service_request_id=instance.id,
+        )
+    else:
+        invoice = drafted_invoice
+    
+
+    InvoiceLineItem.objects.create(
+        invoice=invoice,
+        description=message,
+        qty=1,
+        unit_price_cents=price,
+    )
+
+    return invoice
+
 def bill_meeting(meeting: Meeting) -> Invoice:
     if not meeting.is_billable:
         raise ValueError("Meeting is not billable.")
@@ -15,18 +37,9 @@ def bill_meeting(meeting: Meeting) -> Invoice:
     if amount_cents <= 0:
         raise ValueError("Billable meeting has no charge (check rate/type).")
 
-    invoice = Invoice.objects.create(
-        company=meeting.company,
-        client=meeting.client,
-        status=Invoice.Status.DRAFT,
-    )
-
-    InvoiceLineItem.objects.create(
-        invoice=invoice,
-        description=f"Meeting with {meeting.company.name} ({meeting.start_at:%Y-%m-%d})",
-        qty=1,
-        unit_price_cents=amount_cents,
-    )
+    message = f"Meeting with {meeting.company.name} ({meeting.start_at:%Y-%m-%d})"
+    client = meeting.req
+    invoice = check_invoice(meeting, client, message, amount_cents)
 
     invoice.recalc_totals()
     invoice.save()

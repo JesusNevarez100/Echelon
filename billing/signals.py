@@ -3,14 +3,14 @@ from django.dispatch import receiver
 from billing.models import Invoice, InvoiceLineItem
 from services.models import ServiceRequest
 from scheduling.models import Meeting
-from billing.services import bill_meeting
+from billing.services import bill_meeting, check_invoice
 
 @receiver(post_save, sender=Meeting)
 def create_meeting_invoice_on_complement(sender, instance: Meeting, created: bool, **kwargs):
     if instance.status != "FINISHED":
         return 
 
-    if Meeting.objects.filter(meeting_request_id=instance.id).exists():
+    if Invoice.objects.filter(meeting_request_id=instance.id).exists():
         return
     
     bill_meeting(instance)
@@ -24,20 +24,11 @@ def create_service_invoice_on_completion(sender, instance: ServiceRequest, creat
     if Invoice.objects.filter(service_request_id=instance.id).exists():
         return
 
-    service = instance.service
-    invoice = Invoice.objects.create(
-        company=instance.company,
-        client=instance.requested_by,
-        status=Invoice.Status.DRAFT,
-        service_request_id=instance.id,
-    )
-
-    InvoiceLineItem.objects.create(
-        invoice=invoice,
-        description=f"Service: {service.name}",
-        qty=1,
-        unit_price_cents=service.base_price_cents,
-    )
+    ## Find a way to not make too many invoices for a client
+    # if the client has an open invoice they should be charged to the same invoice
+    service=instance.service
+    message=f"Service: {service.name}"
+    invoice = check_invoice(instance, message, service.base_price_cents)
 
     invoice.recalc_totals()
     invoice.save()
