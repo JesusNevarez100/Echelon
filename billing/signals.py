@@ -21,14 +21,14 @@ def create_service_invoice_on_completion(sender, instance: ServiceRequest, creat
         return
 
     # avoid duplicates
-    if Invoice.objects.filter(service_request_id=instance.id).exists():
+    if Invoice.objects.filter(service_requested_id=instance.id).exists():
         return
 
     ## Find a way to not make too many invoices for a client
     # if the client has an open invoice they should be charged to the same invoice
     service=instance.service
     message=f"Service: {service.name}"
-    invoice = check_invoice(instance, message, service.base_price_cents)
+    invoice = check_invoice(instance, instance.requested_by, message, service.base_price)
 
     invoice.recalc_totals()
     invoice.save()

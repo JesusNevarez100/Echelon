@@ -9,7 +9,7 @@ def check_invoice(instance, client, message, price) -> Invoice:
             company=instance.company,
             client=client,
             status=Invoice.Status.DRAFT,
-            service_request_id=instance.id,
+            service_requested_id=instance.id,
         )
     else:
         invoice = drafted_invoice

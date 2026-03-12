@@ -7,7 +7,6 @@ app_name = "services"
 
 urlpatterns = [
     path("/", views.displayServices, name="services_home"),
-    # path("<int:membership_id>/", views.displayServices, name="company_services"),
-    path("<int:membership_id>/create/", views.createService, name="create_service"),
+    path("/create/", views.createService, name="create_service")
 ]
 
