@@ -1,10 +1,11 @@
 from django.urls import path
 from . import views
+from .views import create_meeting
 
 app_name = "scheduling"
 
 urlpatterns = [
-	path("", views.index, name="index"),
-    path("api/meetings/", views.meetings_json, name="meetings_json"),
-    path("api/meetings/create/", views.create_meeting, name="create_meeting")
+    path("", views.index, name="index"),
+    path("meetings/", views.meetings_json),
+    path("create/", views.create_meeting),
 ]
