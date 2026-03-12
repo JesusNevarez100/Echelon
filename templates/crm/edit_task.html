@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Edit Task{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width: 800px;">
+    <h1 style="margin-top:0;">Edit Task</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="row" style="margin-top:16px;">
+        <button class="btn primary" type="submit">Update Task</button>
+        <a class="btn" href="{% url 'crm:task_detail' task.id %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Task Detail{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <h1 style="margin-top:0;">{{ task.title }}</h1>
+
+    <p class="muted">{{ task.description|default:"No description provided." }}</p>
+
+    <p><strong>Status:</strong> {{ task.get_status_display }}</p>
+    <p>
+      <strong>Assigned to:</strong>
+      {% if task.assigned_to %}
+        {{ task.assigned_to.username }}
+      {% else %}
+        Unassigned
+      {% endif %}
+    </p>
+    <p>
+      <strong>Created by:</strong>
+      {% if task.created_by %}
+        {{ task.created_by.username }}
+      {% else %}
+        Unknown
+      {% endif %}
+    </p>
+    <p><strong>Due at:</strong> {{ task.due_at|default:"No due date" }}</p>
+    <p><strong>Service Request:</strong> {{ task.service_request|default:"None" }}</p>
+    <p><strong>Contact:</strong> {{ task.contact|default:"None" }}</p>
+
+    <div class="row" style="margin-top:20px;">
+      {% if can_edit %}
+        <a class="btn primary" href="{% url 'crm:edit_task' task.id %}">Edit</a>
+      {% endif %}
+      {% if can_delete %}
+        <a class="btn" href="{% url 'crm:delete_task' task.id %}">Delete</a>
+      {% endif %}
+      <a class="btn" href="{% url 'crm:index' %}">Back</a>
+    </div>
+  </div>
+{% endblock %}

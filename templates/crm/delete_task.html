@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Delete Task{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width: 700px;">
+    <h1 style="margin-top:0;">Delete Task</h1>
+    <p>Are you sure you want to delete <strong>{{ task.title }}</strong>?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="row" style="margin-top:16px;">
+        <button class="btn primary" type="submit">Yes, Delete</button>
+        <a class="btn" href="{% url 'crm:task_detail' task.id %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

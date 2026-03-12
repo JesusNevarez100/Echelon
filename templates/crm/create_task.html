@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Create Task{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width: 800px;">
+    <h1 style="margin-top:0;">Create Task</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="row" style="margin-top:16px;">
+        <button class="btn primary" type="submit">Save Task</button>
+        <a class="btn" href="{% url 'crm:index' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
