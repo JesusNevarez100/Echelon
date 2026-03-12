@@ -21,7 +21,7 @@
             <th style="padding: 10px 8px;">Invoice</th>
             <th style="padding: 10px 8px;">Client</th>
             <th style="padding: 10px 8px;">Status</th>
-            <th style="padding: 10px 8px;">Total (cents)</th>
+            <th style="padding: 10px 8px;">Total (USD)</th>
             <th style="padding: 10px 8px;">Issued</th>
             <th style="padding: 10px 8px;">Paid</th>
           </tr>
@@ -34,7 +34,7 @@
               </td>
               <td style="padding: 10px 8px;">{{ invoice.client.username|default:"-" }}</td>
               <td style="padding: 10px 8px;">{{ invoice.get_status_display }}</td>
-              <td style="padding: 10px 8px;">{{ invoice.total_cents }}</td>
+              <td style="padding: 10px 8px;">${{ invoice.total_cents }}</td>
               <td style="padding: 10px 8px;">{{ invoice.issued_at|date:"Y-m-d H:i" }}</td>
               <td style="padding: 10px 8px;">{{ invoice.paid_at|date:"Y-m-d H:i"|default:"-" }}</td>
             </tr>

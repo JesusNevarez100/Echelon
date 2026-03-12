@@ -23,9 +23,9 @@
 
     <section class="card" style="grid-column: span 6;">
       <h3 style="margin-top: 0;">Totals</h3>
-      <p><strong>Subtotal:</strong> {{ invoice.subtotal_cents }} cents</p>
-      <p><strong>Tax:</strong> {{ invoice.tax_cents }} cents</p>
-      <p><strong>Total:</strong> {{ invoice.total_cents }} cents</p>
+      <p><strong>Subtotal:</strong>${{ invoice.subtotal_cents }}</p>
+      <p><strong>Tax:</strong>${{ invoice.tax_cents }}</p>
+      <p><strong>Total:</strong>${{ invoice.total_cents }}</p>
     </section>
   </div>
 
@@ -38,8 +38,8 @@
           <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,.12);">
             <th style="padding: 10px 8px;">Description</th>
             <th style="padding: 10px 8px;">Quantity</th>
-            <th style="padding: 10px 8px;">Unit Price (cents)</th>
-            <th style="padding: 10px 8px;">Line Total (cents)</th>
+            <th style="padding: 10px 8px;">Unit Price (USD)</th>
+            <th style="padding: 10px 8px;">Line Total (USD)</th>
           </tr>
         </thead>
         <tbody>
@@ -47,8 +47,8 @@
             <tr style="border-bottom: 1px solid rgba(255,255,255,.08);">
               <td style="padding: 10px 8px;">{{ line_item.description }}</td>
               <td style="padding: 10px 8px;">{{ line_item.qty }}</td>
-              <td style="padding: 10px 8px;">{{ line_item.unit_price_cents }}</td>
-              <td style="padding: 10px 8px;">{{ line_item.line_total_cents }}</td>
+              <td style="padding: 10px 8px;">${{ line_item.unit_price_cents }}</td>
+              <td style="padding: 10px 8px;">${{ line_item.line_total_cents }}</td>
             </tr>
           {% endfor %}
         </tbody>
