@@ -28,6 +28,7 @@ urlpatterns = [
     path("services/", include("services.urls")),
 	path("scheduling/", include("scheduling.urls")),
 	path("billing/", include("billing.urls")),
+	path('api/meetings/', include('scheduling.urls')),
 	path(
 		"password-change/done/",
 		auth_views.PasswordChangeDoneView.as_view(),
