@@ -2,20 +2,22 @@
 {% block title %}Services{% endblock %}
 
 {% block content %}
-<div class="grid" style="align-items: start; gap: 24px;">
+{% comment %} <div class="grid" style="align-items: start; gap: 24px;"> {% endcomment %}
     <div class="card" style="grid-column: span 7; padding:24px;">
-        <h1 style="margin-top:0; font-size: 36px; line-height: 1.2; margin-bottom:16px;">
-            Services for {{ company.name }}
-        </h1>
-
-        {% if can_update_services %}
-        <div style="margin-bottom: 24px; display:flex; gap:12px; flex-wrap:wrap;">
-            <a href="{% url 'services:create_service' %}"
-               style="display:inline-block; padding:12px 20px; background:#4f7cff; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">
-                + Create Service
-            </a>
+        <div class="request-card-header">
+            <h1 style="margin-top:0; font-size: 24px; line-height: 1.2; margin-bottom:16px;">
+                Services for {{ company.name }}
+            </h1>
+    
+            {% if can_update_services %}
+            <div style="margin-bottom: 24px; display:flex; gap:12px; flex-wrap:wrap;">
+                <a href="{% url 'services:create_service' %}"
+                   style="display:inline-block; padding:12px 20px; background:#4f7cff; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">
+                    + Create Service
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
         <div style="overflow-x:auto;">
             {% if services %}
@@ -26,7 +28,8 @@
                             <th>Description</th>
                             <th>Status</th>
                             <th>Price (USD)</th>
-                            <th>Actions</th>
+                            {% comment %} Action {% endcomment %}
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,11 +97,64 @@
         </div>
     </div>
 
-    <div class="card" style="grid-column: span 5; padding:24px;">
-        <h2 style="margin-top:0; font-size: 24px;">Requested Services</h2>
-
+{% comment %} </div> {% endcomment %}
+<br>
+<div class="card" style="grid-column: span 5; padding:24px;">
+    <h2 style="margin-top:0; font-size: 24px;">Requested Services</h2>
+    <div style="overflow-x:auto;">
         {% if requested_services %}
-            <div class="requested-services-list">
+            <table class="services-table">
+                <thead>
+                    </tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Requested by</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    {% for request_item in requested_services %}
+                        <tr>
+                            <td>{{ request_item.id }}</td>
+                            <td>{{ request_item.requested_at|date:"m/d/y" }}
+                            <td>{{request_item.service.name}}</td>
+                            <td>${{request_item.service.base_price}}</td>
+                            <td>{{request_item.status}}</td>
+                            <td>{{request_item.requested_by}}</td>
+                            <td>
+                                {% if can_view_all_requests %}
+                                    <div class="request-actions-row">
+
+                                        <form method="post" style="margin:0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="complete_request">
+                                            <input type="hidden" name="request_id" value="{{ request_item.id }}">
+                                            <button type="submit" class="action-button complete-button" {% if request_item.status == "COMPLETED" %}disabled{% endif %}>
+                                                {% if request_item.status == "COMPLETED" %}
+                                                    Completed
+                                                {% else %}
+                                                    Mark Complete
+                                                {% endif %}
+                                            </button>
+                                        </form>
+
+                                        <form method="post" style="margin:0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_request">
+                                            <input type="hidden" name="request_id" value="{{ request_item.id }}">
+                                            <button type="submit" class="action-button delete-button">Delete Request</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% comment %} <div class="requested-services-list">
                 {% for request_item in requested_services %}
                     <div class="request-card">
                         <div class="request-card-header">
@@ -144,7 +200,7 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-            </div>
+            </div> {% endcomment %}
         {% else %}
             <p class="muted" style="margin-top:12px; line-height:1.6;">
                 {% if can_view_all_requests %}
@@ -156,17 +212,16 @@
                 {% endif %}
             </p>
         {% endif %}
-
-        <div class="card info-panel" style="margin-top:24px; padding:16px; border-radius:8px;">
-            <div class="muted" style="font-size:14px; line-height:1.6;">
-                {% if can_request_services %}
-                    <strong>Client access:</strong> You can request services and review the services you have already requested.
-                {% elif can_update_services %}
-                    <strong>Company access:</strong> You can create services, update existing services, and review all requested services.
-                {% else %}
-                    <strong>Access summary:</strong> Your membership does not currently have service request or update permissions.
-                {% endif %}
-            </div>
+    </div>
+    <div class="card info-panel" style="margin-top:24px; padding:16px; border-radius:8px;">
+        <div class="muted" style="font-size:14px; line-height:1.6;">
+            {% if can_request_services %}
+                <strong>Client access:</strong> You can request services and review the services you have already requested.
+            {% elif can_update_services %}
+                <strong>Company access:</strong> You can create services, update existing services, and review all requested services.
+            {% else %}
+                <strong>Access summary:</strong> Your membership does not currently have service request or update permissions.
+            {% endif %}
         </div>
     </div>
 </div>
@@ -198,10 +253,10 @@
     font-weight: 600;
 }
 
-.services-table tbody tr:hover {
+{% comment %} .services-table tbody tr:hover {
     background: rgba(79,124,255,.1);
     transition: background 0.2s;
-}
+} {% endcomment %}
 
 .status {
     font-weight: 600;
@@ -247,7 +302,9 @@
 }
 
 .complete-button {
-    background: #22c55e;
+    background: rgba(255,255,255,.06);
+    border: 1px solid  #22c55e;
+    {% comment %} background: #22c55e; {% endcomment %}
     color: #ffffff;
 }
 
@@ -257,13 +314,16 @@
 }
 
 .delete-button {
-    background: #dc2626;
+    background: rgba(255,255,255,.06);
+    border: 1px solid #dc2626;
+    {% comment %} background: #dc2626; {% endcomment %}
     color: #ffffff;
 }
 
 .update-button {
     list-style: none;
     background: rgba(255,255,255,.08);
+    border: 1px solid rgba(79,124,255,.6);
     color: #e6e8ee;
 }
 
