@@ -3,12 +3,85 @@
 {% block title %}Invoice #{{ invoice.id }}{% endblock %}
 
 {% block content %}
+<style>
+  .invoice-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .action-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .send-button {
+    background: #4f7cff;
+    color: #ffffff;
+  }
+  .send-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  .return-button {
+    {% comment %} background: #rgba(255,255,255,.08) {% endcomment %}
+    background: rgba(255,255,255,.06);
+    color: #ffffff;
+  }
+  .delete-button {
+    background: #dc2626;
+    color: #ffffff;
+  }
+  .pay-button {
+    background: #22c55e;
+    color: #ffffff;
+  }
+  .pay-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+</style>
   <div class="row" style="justify-content: space-between; align-items: center;">
     <div>
       <h1 style="margin-bottom: 8px;">Invoice #{{ invoice.id }}</h1>
       <p class="muted" style="margin: 0;">{{ invoice.company.name }} | {{ invoice.get_status_display }}</p>
     </div>
-    <a class="btn" href="{% url 'billing:display_invoices' %}">Back to invoices</a>
+    {% if is_client %}
+      <form method="post" style="margin:0;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="pay_invoice">
+        <button type="submit" class="action-button pay-button">Pay Invoice</button>
+      </form>
+    {% elif is_company %}
+      <form method="post" style="margin:0;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="send_invoice">
+        <button type="submit" class="action-button send-button" {% if invoice.status == "SENT" %}disabled{% endif %}>
+          {% if invoice.status == "SENT" %}
+          Invoice Sent
+          {% else %}
+          Send Invoice
+          {% endif %}
+        </button>
+      </form> 
+    {%elif can_remove_invoice %}
+      <form method="post" style="margin:0;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="remove_invoice">
+        <button type="submit" class="action-button delete-button">Remove Invoice</button>
+      </form>
+    {% endif %}
+      <form method="post" style="margin:0;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="return">
+      <button type="submit" class="action-button return-button">Back to Invoices</button>
+    </form>
   </div>
 
   <div class="grid" style="margin-top: 16px;">

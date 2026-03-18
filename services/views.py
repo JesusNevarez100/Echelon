@@ -6,41 +6,6 @@ from .models import Service, ServiceRequest
 from accounts.models import Membership
 from accounts.services import get_primary_membership
 
-# @login_required
-# def displayServices(request):
-#     # membership = get_object_or_404(Membership, membership_id=membership_id)
-#     membership = get_primary_membership(request.user)
-
-#     company = membership.company
-#     services = Service.objects.filter(company=company)
-
-#     return render(request, "services/displayServices.html", {
-#         "services": services,
-#         "company": company,
-#         "membership": membership
-#     })
-
-
-# def serviceDetails(request, service_id):
-#     # Display Service & Membership
-#     # Client should be able to request the service
-#     # CRUD
-#     membership = get_primary_membership(request.user)
-#     service = Service.objects.filter(service_id=service_id)
-
-#     return render(request, "services/ServiceDetail.html", {
-#         "membership": membership,
-#         "service": service
-#     })
-
-
-
-# @login_required
-# def servicesHome(request):
-#     membership = get_object_or_404(Membership, user=request.user)
-#     return redirect("services:company_services", membership_id=membership.membership_id)
-
-
 @method_decorator(login_required, name="dispatch")
 class DisplayServicesView(View):
     template_name = "services/displayServices.html"
