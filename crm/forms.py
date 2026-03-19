@@ -23,6 +23,10 @@ def get_assignable_users(membership):
             Membership.Role.STAFF,
             Membership.Role.CLIENT,
         }
+    elif membership.role == Membership.Role.CLIENT:
+        allowed_roles = {
+            Membership.Role.CLIENT
+        }
     else:
         allowed_roles = set()
 
@@ -44,6 +48,7 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
+        
         fields = [
             "title",
             "description",
@@ -59,9 +64,15 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, membership=None, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        if membership is not None and membership.role == Membership.Role.CLIENT:
+            self.fields["assigned_to"].queryset = User.objects.filter(pk=membership.user.pk)
+            self.fields["assigned_to"].initial = membership.user
+            self.fields["assigned_to"].disabled = True
 
         if membership is not None:
-            self.fields["assigned_to"].queryset = get_assignable_users(membership)
+            if membership.role != Membership.Role.CLIENT:
+                self.fields["assigned_to"].queryset = get_assignable_users(membership)
             self.fields["contact"].queryset = Contact.objects.filter(company=membership.company)
             self.fields["service_request"].queryset = ServiceRequest.objects.filter(company=membership.company)
 

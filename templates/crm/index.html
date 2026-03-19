@@ -2,17 +2,21 @@
 {% block title %}CRM Tasks{% endblock %}
 
 {% block content %}
-  <h1 style="margin-top:0;">CRM Tasks</h1>
-  <p class="muted">
-    Company: {{ membership.company.name }} |
-    Role: {{ membership.get_role_display|default:membership.role }}
-  </p>
-
-  {% if can_create_tasks %}
+  <div class="row" style="justify-content: space-between; align-items: center;">
+    <div>
+      <h1 style="margin: 0;">CRM Tasks</h1>
+      <p class="muted" style="margin: 4px 0 0 0;">
+        Company: {{ membership.company.name }} |
+        Role: {{ membership.get_role_display|default:membership.role }}
+      </p>
+    </div>
+    
+    {% if can_create_tasks %}
     <div style="margin: 18px 0 24px 0;">
       <a class="btn primary" href="{% url 'crm:create_task' %}">Create Task</a>
     </div>
-  {% endif %}
+    {% endif %}
+  </div>
 
   <div class="grid">
     <div class="card" style="grid-column: span 12;">

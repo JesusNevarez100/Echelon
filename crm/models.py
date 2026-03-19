@@ -52,7 +52,7 @@ class Task(models.Model):
 
 	def clean(self):
 		# If linked with service request enforce same company
-		if self.service_request and self.service_request.company_id != self.company_id:
+		if self.service_request and self.service_request.company != self.company:
 			raise ValidationError("Task.company must match ServiceRequest.company")
 
 	def __str__(self):

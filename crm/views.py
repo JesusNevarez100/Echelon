@@ -8,11 +8,17 @@ from .forms import TaskForm
 from .models import Task
 
 
+def _create_task_for_client(membership):
+    return membership.role in {
+
+    }
+
 def _can_create_tasks(membership):
     return membership.role in {
         Membership.Role.ADMIN,
         Membership.Role.MANAGER,
         Membership.Role.STAFF,
+        Membership.Role.CLIENT
     }
 
 
@@ -68,17 +74,47 @@ def create_task(request):
 
     if not _can_create_tasks(membership):
         return HttpResponseForbidden("You do not have permission to create tasks.")
-
+    company = membership.company
+    # Permissions!
+    # Clients can assign only to themselves
+    # Companies staff can assign only to themselves or clients
+    # Managers can assign to everyone
     if request.method == "POST":
-        form = TaskForm(request.POST, membership=membership)
+        task_instance = Task(
+            company=membership.company,
+            created_by=request.user,
+            assigned_to=request.user if membership.role == Membership.Role.CLIENT else None,
+        )
+        form = TaskForm(request.POST, instance=task_instance, membership=membership)
         if form.is_valid():
             task = form.save(commit=False)
+            if membership == Membership.Role.CLIENT:
+                task.assigned_to = request.user
+
             task.company = membership.company
             task.created_by = request.user
             task.save()
             return redirect("crm:index")
     else:
+        task_instance = Task(
+            company=membership.company,
+            created_by=request.user,
+            assigned_to=request.user if membership.role == Membership.Role.CLIENT else None,
+        )
         form = TaskForm(membership=membership)
+    
+
+    
+    # if request.method == "POST":
+    #     form = TaskForm(request.POST, membership=membership)
+    #     if form.is_valid():
+    #         task = form.save(commit=False)
+    #         task.company = membership.company
+    #         task.created_by = request.user
+    #         task.save()
+    #         return redirect("crm:index")
+    # else:
+    #     form = TaskForm(membership=membership)
 
     return render(request, "crm/create_task.html", {
         "form": form,
