@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 
-from accounts.forms import CreateCompanyUserForm, ForceProfileResetForm
+from accounts.forms import AccountProfileForm, CreateCompanyUserForm, ForceProfileResetForm
 from accounts.models import Membership, User
 from accounts.services import can_create_role, get_primary_membership
 from accounts.utils import create_temp_password, create_temp_username
@@ -27,6 +27,63 @@ class ForcePasswordChangeView(PasswordChangeView):
             return redirect("accounts_custom:force_profile_reset")
 
         return response
+
+
+@login_required
+def account_detail(request):
+    membership = get_primary_membership(request.user)
+    return render(
+        request,
+        "accounts/account_detail.html",
+        {
+            "account_user": request.user,
+            "membership": membership,
+        },
+    )
+
+
+@login_required
+def edit_account_detail(request):
+    if request.method == "POST":
+        form = AccountProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("accounts_custom:account_detail")
+    else:
+        form = AccountProfileForm(instance=request.user)
+
+    membership = get_primary_membership(request.user)
+    return render(
+        request,
+        "accounts/account_edit.html",
+        {
+            "form": form,
+            "membership": membership,
+        },
+    )
+
+
+@login_required
+def account_list(request):
+    if request.user.is_superuser:
+        memberships = Membership.objects.select_related("user", "company").order_by(
+            "company__name", "user__username"
+        )
+    else:
+        membership = get_primary_membership(request.user)
+        if not membership or membership.role != Membership.Role.ADMIN:
+            return HttpResponseForbidden("Admin access is required.")
+        memberships = Membership.objects.select_related("user", "company").filter(
+            company=membership.company
+        ).order_by("user__username")
+
+    return render(
+        request,
+        "accounts/account_list.html",
+        {
+            "memberships": memberships,
+        },
+    )
 
 
 @login_required
@@ -85,11 +142,11 @@ def create_company_user(request):
     MSR = Membership.Role
     allowed_roles = []
     if membership.role == MSR.ADMIN:
-        allowed_roles = [MSR.ADMIN.value, MSR.MANAGER.value, MSR.STAFF.value, MSR.CLIENT.value]
+        allowed_roles = [MSR.MANAGER.value, MSR.STAFF.value, MSR.CLIENT.value]
     elif membership.role == MSR.MANAGER:
         allowed_roles = [MSR.MANAGER.value, MSR.STAFF.value, MSR.CLIENT.value]
     elif membership.role == MSR.STAFF:
-        allowed_roles = [MSR.STAFF.value, MSR.CLIENT.value]
+        allowed_roles = [MSR.CLIENT.value]
     
     if request.method == "POST":
         form = CreateCompanyUserForm(request.POST, allowed_roles=allowed_roles)

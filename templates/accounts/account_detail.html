@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}My Account{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">My Account</h1>
+
+  <div class="card" style="max-width: 640px;">
+    <p><strong>Username:</strong> {{ account_user.username }}</p>
+    <p><strong>Email:</strong> {{ account_user.email|default:"Not set" }}</p>
+    <p><strong>First name:</strong> {{ account_user.first_name|default:"Not set" }}</p>
+    <p><strong>Last name:</strong> {{ account_user.last_name|default:"Not set" }}</p>
+    <p><strong>Status:</strong> {{ account_user.status }}</p>
+    {% if membership %}
+      <p><strong>Company:</strong> {{ membership.company.name }}</p>
+      <p><strong>Role:</strong> {{ membership.role }}</p>
+    {% endif %}
+
+    <div class="row" style="margin-top: 16px;">
+      <a class="btn primary" href="{% url 'accounts_custom:edit_account_detail' %}">Edit Account</a>
+      {% if user.is_superuser or membership.role == "ADMIN" %}
+        <a class="btn" href="{% url 'accounts_custom:account_list' %}">View Accounts</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

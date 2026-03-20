@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">Accounts</h1>
+
+  <div class="card">
+    <table style="width:100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding: 0 0 12px;">Username</th>
+          <th style="text-align:left; padding: 0 0 12px;">Name</th>
+          <th style="text-align:left; padding: 0 0 12px;">Email</th>
+          <th style="text-align:left; padding: 0 0 12px;">Company</th>
+          <th style="text-align:left; padding: 0 0 12px;">Role</th>
+          <th style="text-align:left; padding: 0 0 12px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for membership in memberships %}
+          <tr>
+            <td style="padding: 8px 0;">{{ membership.user.username }}</td>
+            <td style="padding: 8px 0;">{{ membership.user.first_name }} {{ membership.user.last_name }}</td>
+            <td style="padding: 8px 0;">{{ membership.user.email|default:"Not set" }}</td>
+            <td style="padding: 8px 0;">{{ membership.company.name }}</td>
+            <td style="padding: 8px 0;">{{ membership.role }}</td>
+            <td style="padding: 8px 0;">{{ membership.user.status }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="muted" style="padding: 8px 0;">No accounts found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

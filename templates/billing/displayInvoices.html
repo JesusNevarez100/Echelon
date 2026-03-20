@@ -3,19 +3,18 @@
 {% block title %}Invoices{% endblock %}
 
 {% block content %}
-  <h1>Invoices</h1>
-  <p class="muted">
-    Company: {{ membership.company.name }}
-    {% if is_client %}
-      | Showing your sent and paid invoices.
-    {% else %}
-      | Showing draft, sent, paid, and voided invoices.
-    {% endif %}
-  </p>
-
   {% if invoices %}
     <div class="card" style="overflow-x: auto; margin-top: 16px;">
-      <table style="width: 100%; border-collapse: collapse;">
+      <h1 style="margin-top:0; font-size: 24px; line-height: 1.2; margin-bottom:16px;">Invoices</h1>
+      <p class="muted">
+       {{ membership.company.name }}
+        {% if is_client %}
+          | Showing your sent and paid invoices.
+        {% else %}
+          | Showing draft, sent, paid, and voided invoices.
+        {% endif %}
+      </p>
+      <table class="services-table" style="width: 100%; border-collapse: collapse;">
         <thead>
           <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,.12);">
             <th style="padding: 10px 8px;">Invoice</th>

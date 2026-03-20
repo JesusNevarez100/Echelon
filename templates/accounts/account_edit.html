@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Edit Account{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">Edit Account</h1>
+  {% if membership %}
+    <p class="muted">{{ membership.company.name }} • {{ membership.role }}</p>
+  {% endif %}
+
+  <div class="card" style="max-width: 640px;">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="row">
+        <button class="btn primary" type="submit">Save Changes</button>
+        <a class="btn" href="{% url 'accounts_custom:account_detail' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

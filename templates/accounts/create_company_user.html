@@ -2,19 +2,26 @@
 {% block title %}Create User{% endblock %}
 
 {% block content %}
-  <h1 style="margin-top:0;">Create User</h1>
-  <p class="muted">Company: {{ company.name }} • Your role: {{ creator_role }}</p>
+  <div class="grid" style="align-items: start; gap: 24px;">
 
-  <div class="card" style="max-width: 560px;">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button class="btn primary" type="submit">Create</button>
-      <a class="btn" href="/app/">Cancel</a>
-    </form>
+    <!-- Form -->
+    <div class="card" style="grid-column: span 7; padding:24px;">
+        <h1 style="margin-top:0; font-size:36px; line-height:1.2; margin-bottom:16px;">
+            Create User
+        </h1>
+        <p class="muted">Company: {{ company.name }} • Your role: {{ creator_role }}</p>
+        <div class="card" style="padding:20px; background:#1f1f2e; border-radius:12px; margin-top:16px;">
+          <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn primary" type="submit">Create</button>
+            <a class="btn" href="/app/">Cancel</a>
+          </form>
+        </div>
+        
+        <p class="muted" style="margin-top:12px;">
+          The user will receive temporary credentials and must reset password, username, and email before accessing the app.
+        </p>
+    </div>
   </div>
-
-  <p class="muted" style="margin-top:12px;">
-    The user will receive temporary credentials and must reset password, username, and email before accessing the app.
-  </p>
 {% endblock %}

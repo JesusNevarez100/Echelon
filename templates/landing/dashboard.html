@@ -2,32 +2,34 @@
 {% block title %}Echelon{% endblock %}
 
 {% block content %}
-  <h1 style="margin-top:0;">Welcome {{ request.user.username}}</h1>
+  <h1 style="margin-top:0;">Welcome {{ request.user.username}} <i class="bi bi-tsunami"></i></h1>
   <p class="muted">Choose a module.</p>
   {% if user.is_authenticated %}
     <div style="margin: 16px 0;">
-      <a class="btn" href="/apps/accounts/create-user/">Create User</a>
+      <a class="btn" href="/apps/accounts/create-user/"><i class="bi bi-person-plus"></i></a>
+      <a class="btn" href="{% url 'accounts_custom:account_detail' %}">Account Details </a>
+
     </div>
   {% endif %}
 
   <div class="grid">
     <a class="card" style="grid-column: span 6;" href="/crm/">
-      <h2 style="margin:0 0 6px 0;">CRM</h2>
+      <h2 style="margin:0 0 6px 0;"><i class="bi bi-clipboard"></i> CRM</h2>
       <div class="muted">Contacts + Tasks</div>
     </a>
 
     <a class="card" style="grid-column: span 6;" href="{% url 'services:services_home'  %}">
-      <h2 style="margin:0 0 6px 0;">Services</h2>
+      <h2 style="margin:0 0 6px 0;"><i class="bi bi-bag"></i> Services</h2>
       <div class="muted">Service catalog + Requests</div>
     </a>
 
     <a class="card" style="grid-column: span 6;" href="/scheduling/">
-      <h2 style="margin:0 0 6px 0;">Scheduling</h2>
+      <h2 style="margin:0 0 6px 0;"><i class="bi bi-calendar"></i> Scheduling</h2>
       <div class="muted">Meetings + Participants</div>
     </a>
 
     <a class="card" style="grid-column: span 6;" href="/billing/invoices/">
-      <h2 style="margin:0 0 6px 0;">Billing</h2>
+      <h2 style="margin:0 0 6px 0;"><i class="bi bi-receipt"></i> Billing</h2>
       <div class="muted">Invoices + Line Items</div>
     </a>
   </div>

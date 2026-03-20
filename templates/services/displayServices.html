@@ -80,7 +80,7 @@
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_service">
                                             <input type="hidden" name="service_id" value="{{ service.id }}">
-                                            <button type="submit" class="action-button delete-button">Delete Service</button>
+                                            <button type="submit" class="action-button delete-button"><i class="bi bi-trash3"></i></button>
                                         </form>
                                     </div>
                                 {% else %}
@@ -144,7 +144,7 @@
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_request">
                                             <input type="hidden" name="request_id" value="{{ request_item.id }}">
-                                            <button type="submit" class="action-button delete-button">Delete Request</button>
+                                            <button type="submit" class="action-button delete-button"><i class="bi bi-trash3"></i></button>
                                         </form>
                                     </div>
                                 {% endif %}
@@ -291,9 +291,10 @@
 
 .service-actions-stack {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
+    {% comment %} flex-direction: row; {% endcomment %}
+    flex-wrap: row-wrap;
+    {% comment %} gap: 1px; {% endcomment %}
+    {% comment %} align-items: flex-start; {% endcomment %}
 }
 
 .request-button {
@@ -315,7 +316,7 @@
 
 .delete-button {
     background: rgba(255,255,255,.06);
-    border: 1px solid #dc2626;
+    border: 1px solid rgba(255,255,255,.1);
     {% comment %} background: #dc2626; {% endcomment %}
     color: #ffffff;
 }
