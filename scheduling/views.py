@@ -3,7 +3,10 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 from .models import Meeting
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_datetime
+from django.utils.timezone import localtime, make_aware
+from accounts.models import Membership
 import json
+
 
 # Create your views here.
 def index(request):
@@ -11,38 +14,53 @@ def index(request):
 
 
 def meetings_json(request):
-    meetings = Meeting.objects.all().values(
-        "id", "title", "start_at", "end_at"
-    )
-    return JsonResponse(list(meetings), safe=False)
+    meetings = Meeting.objects.all()
+    data = [
+        {
+            "id": m.id,
+            "title": m.title,
+            "start": localtime(m.start_at).isoformat(),
+            "end": localtime(m.end_at).isoformat(),
+        }
+        for m in meetings
+    ]
+    return JsonResponse(data, safe=False)
 
-#Handles meeting stuff, updated to post correctly, idk how great it works cause it doesn't have superuser perms
+
 @csrf_exempt
 def create_meeting(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+    print("METHOD:", request.method)
+    print("BODY RAW:", request.body)
+    print("USER:", request.user)
+    print("AUTH:", request.user.is_authenticated)
 
     try:
         data = json.loads(request.body)
-    except json.JSONDecodeError:
+    except Exception as e:
+        print("JSON ERROR:", e)
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
     title = data.get("title", "")
-    start = parse_datetime(data.get("start"))
-    end = parse_datetime(data.get("end"))
+    start = make_aware(parse_datetime(data.get("start")))
+    end = make_aware(parse_datetime(data.get("end")))
 
 
-    # This makes sure companies can create meetings, clients don't have permission yet sorry :(
-    company = getattr(request.user, "companyaccount", None)
-    if company is None:
-        return JsonResponse({"status": "error", "message": "Company is required"}, status=400)
+	# This makes sure companies can create meetings, clients don't have permission yet sorry :(
+	# Find the user's membership with role MANAGER
+    membership = request.user.memberships.filter(role=Membership.Role.MANAGER).first()
+
+    if membership is None:
+        return JsonResponse({"status": "error", "message": "Manager role required"}, status=403)
+
+    company = membership.company
+
 
     meeting = Meeting.objects.create(
-        title=title,
-        start_at=start,
-        end_at=end,
-        organizer=request.user if request.user.is_authenticated else None,
-        company=company,
-    )
+	    title=title,
+	    start_at=start,
+	    end_at=end,
+	    organizer=request.user,
+	    company=company,
+	)
 
     return JsonResponse({"status": "ok", "id": meeting.id})
