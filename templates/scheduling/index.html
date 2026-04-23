@@ -74,7 +74,7 @@
 </style>
 
 
-<!-- Modal calendar interaction (not fully functional) -->
+<!-- Modal calendar interaction (still doesn't display right) -->
 
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
@@ -103,7 +103,11 @@
 		const calendar = new FullCalendar.Calendar(calendarEl, {
 			initialView: "dayGridMonth",
 			selectable: true,
-			events: "/api/meetings/",
+			events: "/scheduling/meetings/",
+
+			eventColor: "#8ca5d7",   // background color
+			eventTextColor: "#ffffff", // text color
+
 
 			select(info) {
 				document.getElementById("meetingStart").value = info.startStr + "T09:00";
@@ -124,7 +128,7 @@
 			const end = document.getElementById("meetingEnd").value;
 			const attendees = document.getElementById("meetingAttendees").value;
 
-			fetch("/api/meetings/create/", {
+			fetch("/scheduling/create/", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ title, start, end, attendees }),
