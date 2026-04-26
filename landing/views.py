@@ -8,12 +8,14 @@ from accounts.models import Membership
 from accounts.services import get_primary_membership
 from services.models import Service, ServiceRequest
 from scheduling.models import Meeting
+from crm.models import Task, Contact
+from billing.models import Invoice
 
 
 def landing(request):
     return render(request, "landing/landing.html")
 
-#Manages the functionality of the blocks
+#This code manages the functionality of the blocks
 @login_required
 def dashboard(request):
     cards = [
@@ -26,9 +28,6 @@ def dashboard(request):
     return render(request, "landing/dashboard.html", {"cards": cards})
 
 
-#THIS IS FOR TESTING CAUSE I WASN'T SURE HOW TO CREATE THE ACCOUNTS! 
-#If you wanna test with this, embed the link with dashboard/?as=client or dashboard/?as=company
-
 #-------------
 #CRM display
 
@@ -38,48 +37,53 @@ def get_crm_summary(request):
     if membership is None:
         return HttpResponseForbidden("No company membership recognized.")
 
+    company = membership.company
     is_client = membership.role == Membership.Role.CLIENT
 
-    # Test data (still static for now)
-    test_company_clients = ["Parallel Cloak", "Black Sol", "NMT co.", "Umbrella Corp"]
-    test_client_tasks = [
-        "Follow up with Parallel Cloak (due Mar 10)",
-        "Prepare proposal for Black Sol (due Mar 14)",
-    ]
-    test_company_tasks = [
-        "Review quarterly CRM metrics",
-        "Assign leads to sales team",
+    # users can only see their own tasks, lmk if this needs to be changed
+    user_tasks_qs = (
+        Task.objects.filter(company=company, assigned_to=request.user)
+        .order_by("due_at", "-created_at")[:5]
+    )
+    user_tasks = [
+        f"{task.title} (due {task.due_at.date() if task.due_at else 'No due date'})"
+        for task in user_tasks_qs
     ]
 
-    # CLIENT SIDE
+    #block displays
+    #client side
     if is_client:
         return {
             "name": "CRM Overview",
             "desc": "Your company and your tasks",
             "url": "/crm/",
             "sections": [
-                {"title": "Your Company", "items": [membership.company.name]},
-                {"title": "Your Tasks", "items": test_client_tasks},
+                {"title": "Your Company", "items": [company.name]},
+                {"title": "Your Tasks", "items": user_tasks},
             ],
             "actions": [
                 {"label": "View CRM", "url": "/crm/"},
             ],
         }
 
-    # COMPANY SIDE
+    #company side
+    contacts_qs = Contact.objects.filter(company=company).order_by("name")[:10]
+    contacts = [c.name for c in contacts_qs]
+
     return {
         "name": "CRM Overview",
-        "desc": "Company clients and tasks",
+        "desc": "Company contacts and your tasks",
         "url": "/crm/",
         "sections": [
-            {"title": "Clients", "items": test_company_clients},
-            {"title": "Company Tasks", "items": test_company_tasks},
+            {"title": "Contacts", "items": contacts},
+            {"title": "Your Tasks", "items": user_tasks},
         ],
         "actions": [
             {"label": "View CRM", "url": "/crm/"},
-            {"label": "Add Client", "url": "/crm/add-client/"},
+            {"label": "Add Contact", "url": "/crm/add-contact/"},
         ],
     }
+
 
 #-------------
 #Service Display
@@ -91,13 +95,13 @@ def get_services_summary(request):
     is_client = membership.role == Membership.Role.CLIENT
     company = membership.company
 
-    # Available services
+    # list of available services
     available_services = list(
         Service.objects.filter(company=company, active=True)
                        .values_list("name", flat=True)
     )
 
-    # Recent requests (company view)
+    # Recent requests (company side)
     recent_requests_qs = (
         ServiceRequest.objects.filter(company=company)
         .select_related("service", "requested_by")
@@ -108,7 +112,7 @@ def get_services_summary(request):
         for req in recent_requests_qs
     ]
 
-    # Client-specific requests
+    # Client specific requests
     client_requests_qs = (
         ServiceRequest.objects.filter(
             company=company,
@@ -122,7 +126,8 @@ def get_services_summary(request):
         for req in client_requests_qs
     ]
 
-    # Build summary
+    #block displays
+    #client side
     if is_client:
         return {
             "name": "Services",
@@ -162,10 +167,9 @@ def get_scheduling_summary(request):
     user = membership.user
     is_client = membership.role == membership.Role.CLIENT
 
-    # UPCOMING MEETINGS
+    # upcoming meeting display
     MAX_FEATURED = 3
 
-    # UPCOMING MEETINGS
     upcoming_qs = (
 	    Meeting.objects.filter(
 	        company=company,
@@ -193,13 +197,11 @@ def get_scheduling_summary(request):
     else:
         upcoming_items = ["No upcoming meetings"]
 
-    # Add “+ X more upcoming meetings”
     if remaining_count > 0:
         upcoming_items.append(f"{remaining_count} more upcoming meeting(s)")
 
 
-    # PENDING MEETINGS (optional)
-    # If you want to treat "pending" as meetings without a client assigned:
+    #pending meetings (wip, not sure how to display yet)
     pending_qs = Meeting.objects.filter(
         company=company,
         status=Meeting.Status.ACTIVE,
@@ -215,9 +217,7 @@ def get_scheduling_summary(request):
         else f"{pending_count} pending meeting requests"
     )
 
-    # -----------------------------
-    # BUILD CARD
-    # -----------------------------
+    #block displays, same for both accounts
     return {
     "name": "Scheduling",
     "desc": "Make and manage meetings",
@@ -242,50 +242,54 @@ def get_billing_summary(request):
     if membership is None:
         return HttpResponseForbidden("No company membership recognized.")
 
+    company = membership.company
     is_client = membership.role == Membership.Role.CLIENT
 
-    # Static test data
-    recent_invoices = [
-        {"company": "Parallel Cloak", "amount": "$250", "due": "Mar 20"},
-        {"company": "Black Sol", "amount": "$480", "due": "Mar 22"},
-        {"company": "NMT co.", "amount": "$150", "due": "Mar 25"},
-    ]
-
-    # Client-specific invoices
-    client_invoices = [
-        f"{membership.company.name} — $250 (Due Mar 20)"
-    ]
-
-    # CLIENT SIDE
+    # client side
     if is_client:
+        invoices_qs = (
+            Invoice.objects.filter(client=request.user)
+            .order_by("-issued_at")[:5]
+        )
+
+        client_invoices = [
+            f"Invoice #{inv.id} — ${inv.total_cents / 100:.2f} "
+            f"(Due {inv.due_at.date() if inv.due_at else 'No due date'}) — {inv.status}"
+            for inv in invoices_qs
+        ]
+
         return {
             "name": "Billing & Invoices",
             "desc": "Your invoices and payment deadlines",
             "url": "/billing/",
             "sections": [
-                {
-                    "title": "Recent Invoices",
-                    "items": client_invoices,
-                }
+                {"title": "Recent Invoices", "items": client_invoices},
             ],
             "actions": [
                 {"label": "View All Invoices", "url": "/billing/"},
             ],
         }
 
-    # COMPANY SIDE
+    # company side
+    invoices_qs = (
+        Invoice.objects.filter(company=company)
+        .select_related("client")
+        .order_by("-issued_at")[:5]
+    )
+
+    recent_invoices = [
+        f"{inv.client.username if inv.client else 'Unknown Client'} — "
+        f"${inv.total_cents / 100:.2f} "
+        f"(Due {inv.due_at.date() if inv.due_at else 'No due date'}) — {inv.status}"
+        for inv in invoices_qs
+    ]
+
     return {
         "name": "Billing & Invoices",
         "desc": "Recent invoices and payment deadlines",
         "url": "/billing/",
         "sections": [
-            {
-                "title": "Recent Invoices",
-                "items": [
-                    f"{inv['company']} — {inv['amount']} (Due {inv['due']})"
-                    for inv in recent_invoices
-                ],
-            }
+            {"title": "Recent Invoices", "items": recent_invoices},
         ],
         "actions": [
             {"label": "View All Invoices", "url": "/billing/"},
