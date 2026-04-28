@@ -1,1 +1,15 @@
 db.sqlite3
+# Local Python Environment
+EchelonEnv/
+venv/
+.env/
+__pychache__/*.pyc
+.DS_Store
+
+# Local Python environment
+EchelonEnv/
+venv/
+.env/
+__pycache__/
+*.pyc
+.DS_Store
