@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.utils.timezone import now
 from django.http import HttpResponseForbidden
 from django.db import models
+from django.urls import reverse
 
 from accounts.models import Membership
 from accounts.services import get_primary_membership
@@ -24,9 +25,19 @@ def dashboard(request):
         get_scheduling_summary(request),
         get_billing_summary(request),
     ]
+    left_cards = []
+    right_cards = []
 
-    return render(request, "landing/dashboard.html", {"cards": cards})
+    for card in cards:
+        if card["name"] in ["Scheduling", "Billing & Invoices"]:
+            right_cards.append(card)
+        else:
+            left_cards.append(card)
 
+    return render(request, "landing/dashboard.html", {
+        "left_cards": left_cards,
+        "right_cards": right_cards,
+    })
 
 #-------------
 #CRM display
@@ -125,6 +136,9 @@ def get_services_summary(request):
         f"{membership.company.name} requested: {req.service.name}"
         for req in client_requests_qs
     ]
+    reverse("services:services_home")
+    reverse("services:create_service")
+
 
     #block displays
     #client side
@@ -137,7 +151,8 @@ def get_services_summary(request):
                 {"title": "Available Services", "items": available_services},
                 {"title": "Your Recent Requests", "items": client_recent_requests},
             ],
-            "actions": [{"label": "Request a Service", "url": "/services/request/"}],
+            "actions": [{"label": "Request a Service", "url": reverse("services_home")},]
+
         }
 
     return {
@@ -149,8 +164,8 @@ def get_services_summary(request):
             {"title": "Recent Client Requests", "items": recent_requests},
         ],
         "actions": [
-            {"label": "Request a Service", "url": "/services/request/"},
-            {"label": "Add Service", "url": "/services/add/"},
+    {"label": "Request a Service", "url": reverse("services:services_home")},
+    {"label": "Add Service", "url": reverse("services:create_service")},
         ],
     }
 
