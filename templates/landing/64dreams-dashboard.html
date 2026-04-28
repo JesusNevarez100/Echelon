@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Echelon{% endblock %}
+
+{% block content %}
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: 500px 1fr;
+    gap: 50px;
+    align-items: start;
+  }
+
+  .left-column,
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .card {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .profile-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .profile-card h2 {
+    margin: 0 0 6px 0;
+  }
+
+  .block-title {
+    margin-top: 0;
+  }
+</style>
+
+<h1 style="margin-top:0;">Dashboard</h1>
+<p class="muted">Overview of your activity.</p>
+
+<div class="layout">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-column">
+    {% for card in left_cards %}
+    <div class="card">
+      <h2>{{ card.name }}</h2>
+      <p>{{ card.desc }}</p>
+
+      {% for section in card.sections %}
+      <h4>{{ section.title }}</h4>
+      <ul>
+        {% for item in section.items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+
+      <div class="actions">
+        {% for action in card.actions %}
+        <a href="{{ action.url }}" class="btn">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="right-column">
+    {% for card in right_cards %}
+    <div class="card">
+      <h2>{{ card.name }}</h2>
+      <p>{{ card.desc }}</p>
+
+      {% for section in card.sections %}
+      <h4>{{ section.title }}</h4>
+      <ul>
+        {% for item in section.items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+
+      <div class="actions">
+        {% for action in card.actions %}
+        <a href="{{ action.url }}" class="btn">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
