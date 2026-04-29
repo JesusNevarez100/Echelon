@@ -1,75 +1,510 @@
 {% extends "base.html" %}
-{% block title %}CRM Tasks{% endblock %}
+{% block title %}Tasks and Contacts{% endblock %}
 
 {% block content %}
-  <div class="row" style="justify-content: space-between; align-items: center;">
-    <div>
-      <h1 style="margin: 0;">CRM Tasks</h1>
-      <p class="muted" style="margin: 4px 0 0 0;">
-        Company: {{ membership.company.name }} |
-        Role: {{ membership.get_role_display|default:membership.role }}
-      </p>
-    </div>
-    
-    {% if can_create_tasks %}
-    <div style="margin: 18px 0 24px 0;">
-      <a class="btn primary" href="{% url 'crm:create_task' %}">Create Task</a>
-    </div>
-    {% endif %}
-  </div>
-
-  <div class="grid">
+<div class="grid" style="align-items: start;">
     <div class="card" style="grid-column: span 12;">
-      <h2 style="margin-top:0;">My Tasks</h2>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+            <div>
+                <h1 style="margin-top:0;">
+                    CRM Tasks
+                </h1>
 
-      {% if my_tasks %}
-        {% for task in my_tasks %}
-          <div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08);">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
-              <div>
-                <strong>{{ task.title }}</strong>
-                <div class="muted">
-                  Status: {{ task.get_status_display }} |
-                  Due: {{ task.due_at|default:"No due date" }}
-                </div>
-              </div>
-              <a class="btn" href="{% url 'crm:task_detail' task.id %}">Open</a>
+                <p class="muted" style="margin: 4px 0 0 0;">
+                    Company: {{ membership.company.name }} |
+                    Role: {{ membership.get_role_display|default:membership.role }}
+                </p>
             </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p class="muted">No tasks assigned to you.</p>
-      {% endif %}
+
+            {% if can_create_tasks %}
+                <div style="margin-top: 8px;">
+                    <a class="btn primary" href="{% url 'crm:create_task' %}">
+                        Create Task
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card" style="margin-top:16px; overflow-x:auto;">
+            <h2 style="margin-top:0;">My Tasks</h2>
+
+            {% if my_tasks %}
+                <table class="tasks-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Assigned To</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for task in my_tasks %}
+                            <tr id="task-row-{{ task.id }}">
+                                <td>
+                                    <span class="view-mode task-view-{{ task.id }}">
+                                        <strong>{{ task.title }}</strong>
+                                    </span>
+
+                                    <input
+                                        form="task-form-{{ task.id }}"
+                                        class="edit-mode task-edit-{{ task.id }} table-input"
+                                        type="text"
+                                        name="title"
+                                        value="{{ task.title }}"
+                                        style="display:none;"
+                                    >
+                                </td>
+
+                                <td>
+                                    <span class="view-mode task-view-{{ task.id }}">
+                                        {% if task.description %}
+                                            {{ task.description|truncatechars:80 }}
+                                        {% else %}
+                                            <span class="muted">No description</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <textarea
+                                        form="task-form-{{ task.id }}"
+                                        class="edit-mode task-edit-{{ task.id }} table-input table-textarea"
+                                        name="description"
+                                        style="display:none;"
+                                    >{{ task.description|default_if_none:"" }}</textarea>
+                                </td>
+
+                                <td>
+                                    {% if task.assigned_to %}
+                                        <span class="assignee-pill">
+                                            {% if task.assigned_to_id == request.user.id %}
+                                                Me
+                                            {% else %}
+                                                {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                                            {% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="muted">Unassigned</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="view-mode task-view-{{ task.id }}">
+                                        <span class="status {{ task.status|lower }}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </span>
+
+                                    <select
+                                        form="task-form-{{ task.id }}"
+                                        name="status"
+                                        class="edit-mode task-edit-{{ task.id }} table-input"
+                                        style="display:none;"
+                                    >
+                                        {% for value, label in task_status_choices %}
+                                            <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <span class="view-mode task-view-{{ task.id }}">
+                                        {% if task.due_at %}
+                                            {{ task.due_at }}
+                                        {% else %}
+                                            <span class="muted">No due date</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <input
+                                        form="task-form-{{ task.id }}"
+                                        type="datetime-local"
+                                        name="due_at"
+                                        class="edit-mode task-edit-{{ task.id }} table-input"
+                                        value="{% if task.due_at %}{{ task.due_at|date:'Y-m-d\TH:i' }}{% endif %}"
+                                        style="display:none;"
+                                    >
+                                </td>
+
+                                <td>
+                                    <form id="task-form-{{ task.id }}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_task">
+                                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                                    </form>
+
+                                    <div class="actions-cell">
+                                        <button
+                                            type="button"
+                                            class="btn small view-mode task-view-{{ task.id }}"
+                                            onclick="enableTaskEdit('{{ task.id }}')"
+                                        >
+                                            Update
+                                        </button>
+
+                                        <button
+                                            form="task-form-{{ task.id }}"
+                                            type="submit"
+                                            class="btn small edit-mode task-edit-{{ task.id }}"
+                                            style="display:none;"
+                                        >
+                                            Save
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="btn small edit-mode task-edit-{{ task.id }}"
+                                            onclick="cancelTaskEdit('{{ task.id }}')"
+                                            style="display:none;"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        {% if can_delete_tasks %}
+                                            <form method="post" style="display:inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_task">
+                                                <input type="hidden" name="task_id" value="{{ task.id }}">
+                                                <button
+                                                    type="submit"
+                                                    class="btn danger small"
+                                                    onclick="return confirm('Delete this task?');"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">No tasks assigned to you.</p>
+            {% endif %}
+        </div>
     </div>
 
     {% if membership.role != "CLIENT" %}
-      <div class="card" style="grid-column: span 12;">
-        <h2 style="margin-top:0;">Company Tasks</h2>
+        <div class="card" style="grid-column: span 12;">
+            <h2 style="margin-top:0;">Company Tasks</h2>
 
-        {% if tasks %}
-          {% for task in tasks %}
-            <div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08);">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
-                <div>
-                  <strong>{{ task.title }}</strong>
-                  <div class="muted">
-                    Assigned to:
-                    {% if task.assigned_to %}
-                      {{ task.assigned_to.username }}
-                    {% else %}
-                      Unassigned
-                    {% endif %}
-                    | Status: {{ task.get_status_display }}
-                  </div>
-                </div>
-                <a class="btn" href="{% url 'crm:task_detail' task.id %}">Details</a>
-              </div>
+            <div class="card" style="margin-top:16px; overflow-x:auto;">
+                {% if tasks %}
+                    <table class="tasks-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Assigned To</th>
+                                <th>Created By</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for task in tasks %}
+                                <tr id="company-task-row-{{ task.id }}">
+                                    <td>
+                                        <span class="view-mode company-task-view-{{ task.id }}">
+                                            <strong>{{ task.title }}</strong>
+                                        </span>
+
+                                        <input
+                                            form="company-task-form-{{ task.id }}"
+                                            class="edit-mode company-task-edit-{{ task.id }} table-input"
+                                            type="text"
+                                            name="title"
+                                            value="{{ task.title }}"
+                                            style="display:none;"
+                                        >
+                                    </td>
+
+                                    <td>
+                                        <span class="view-mode company-task-view-{{ task.id }}">
+                                            {% if task.description %}
+                                                {{ task.description|truncatechars:80 }}
+                                            {% else %}
+                                                <span class="muted">No description</span>
+                                            {% endif %}
+                                        </span>
+
+                                        <textarea
+                                            form="company-task-form-{{ task.id }}"
+                                            class="edit-mode company-task-edit-{{ task.id }} table-input table-textarea"
+                                            name="description"
+                                            style="display:none;"
+                                        >{{ task.description|default_if_none:"" }}</textarea>
+                                    </td>
+
+                                    <td>
+                                        {% if task.assigned_to %}
+                                            <span class="assignee-pill">
+                                                {% if task.assigned_to_id == request.user.id %}
+                                                    Me
+                                                {% else %}
+                                                    {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                                                {% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if task.created_by %}
+                                            {% if task.created_by_id == request.user.id %}
+                                                Me
+                                            {% else %}
+                                                {{ task.created_by.get_full_name|default:task.created_by.username }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <span class="view-mode company-task-view-{{ task.id }}">
+                                            <span class="status {{ task.status|lower }}">
+                                                {{ task.get_status_display }}
+                                            </span>
+                                        </span>
+
+                                        <select
+                                            form="company-task-form-{{ task.id }}"
+                                            name="status"
+                                            class="edit-mode company-task-edit-{{ task.id }} table-input"
+                                            style="display:none;"
+                                        >
+                                            {% for value, label in task_status_choices %}
+                                                <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <span class="view-mode company-task-view-{{ task.id }}">
+                                            {% if task.due_at %}
+                                                {{ task.due_at }}
+                                            {% else %}
+                                                <span class="muted">No due date</span>
+                                            {% endif %}
+                                        </span>
+
+                                        <input
+                                            form="company-task-form-{{ task.id }}"
+                                            type="datetime-local"
+                                            name="due_at"
+                                            class="edit-mode company-task-edit-{{ task.id }} table-input"
+                                            value="{% if task.due_at %}{{ task.due_at|date:'Y-m-d\TH:i' }}{% endif %}"
+                                            style="display:none;"
+                                        >
+                                    </td>
+
+                                    <td>
+                                        <form id="company-task-form-{{ task.id }}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="update_task">
+                                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                                        </form>
+
+                                        <div class="actions-cell">
+                                            <button
+                                                type="button"
+                                                class="btn small view-mode company-task-view-{{ task.id }}"
+                                                onclick="enableCompanyTaskEdit('{{ task.id }}')"
+                                            >
+                                                Update
+                                            </button>
+
+                                            <button
+                                                form="company-task-form-{{ task.id }}"
+                                                type="submit"
+                                                class="btn small edit-mode company-task-edit-{{ task.id }}"
+                                                style="display:none;"
+                                            >
+                                                Save
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn small edit-mode company-task-edit-{{ task.id }}"
+                                                onclick="cancelCompanyTaskEdit('{{ task.id }}')"
+                                                style="display:none;"
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            {% if can_delete_tasks %}
+                                                <form method="post" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="delete_task">
+                                                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                                                    <button
+                                                        type="submit"
+                                                        class="btn danger small"
+                                                        onclick="return confirm('Delete this task?');"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted">No tasks found.</p>
+                {% endif %}
             </div>
-          {% endfor %}
-        {% else %}
-          <p class="muted">No tasks found.</p>
-        {% endif %}
-      </div>
+        </div>
     {% endif %}
-  </div>
+</div>
+
+<style>
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e6e8ee;
+    font-size: 14px;
+}
+
+.tasks-table th,
+.tasks-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    vertical-align: middle;
+}
+
+.tasks-table th {
+    background: rgba(255,255,255,.05);
+    font-weight: 600;
+}
+
+.tasks-table tbody tr:hover {
+    background: rgba(79,124,255,.1);
+}
+
+.assignee-pill {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    color: #e6e8ee;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.status.open {
+    color: #8ab4ff;
+}
+
+.status.in_progress {
+    color: #ffd166;
+}
+
+.status.done {
+    color: #4fffc3;
+}
+
+.status.cancelled {
+    color: #ff6b6b;
+}
+
+.table-input {
+    width: 100%;
+    min-width: 130px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+    color: #e6e8ee;
+}
+
+.table-textarea {
+    min-height: 42px;
+    resize: vertical;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn.small {
+    padding: 7px 10px;
+    font-size: 13px;
+}
+
+.btn.danger {
+    background: rgba(255, 107, 107, .15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, .35);
+}
+</style>
+
+<script>
+function enableTaskEdit(taskId) {
+    document.querySelectorAll(".task-view-" + taskId).forEach(function(element) {
+        element.style.display = "none";
+    });
+
+    document.querySelectorAll(".task-edit-" + taskId).forEach(function(element) {
+        element.style.display = "";
+    });
+}
+
+function cancelTaskEdit(taskId) {
+    document.querySelectorAll(".task-edit-" + taskId).forEach(function(element) {
+        element.style.display = "none";
+    });
+
+    document.querySelectorAll(".task-view-" + taskId).forEach(function(element) {
+        element.style.display = "";
+    });
+}
+
+function enableCompanyTaskEdit(taskId) {
+    document.querySelectorAll(".company-task-view-" + taskId).forEach(function(element) {
+        element.style.display = "none";
+    });
+
+    document.querySelectorAll(".company-task-edit-" + taskId).forEach(function(element) {
+        element.style.display = "";
+    });
+}
+
+function cancelCompanyTaskEdit(taskId) {
+    document.querySelectorAll(".company-task-edit-" + taskId).forEach(function(element) {
+        element.style.display = "none";
+    });
+
+    document.querySelectorAll(".company-task-view-" + taskId).forEach(function(element) {
+        element.style.display = "";
+    });
+}
+</script>
 {% endblock %}

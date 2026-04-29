@@ -4,7 +4,7 @@ from .models import Contact, Task
 # Register your models here.
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-	list_display = ("name", "company", "type", "email", "phone", "created_at")
+	list_display = ("name", "company", "type", "email", "phone", "created_at", "created_by")
 	list_filter = ("type", "company")
 	search_fields = ("name", "email", "phone", "company__name")
 

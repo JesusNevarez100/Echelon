@@ -15,7 +15,19 @@ class Contact(models.Model):
 		COMPANY = "COMPANY", "Company"
 		OTHER = "OTHER", "Other"
 	
-	company = models.ForeignKey(CompanyAccount, on_delete=models.CASCADE, related_name="contacts")
+	company = models.ForeignKey(
+		CompanyAccount, 
+		on_delete=models.CASCADE, 
+		related_name="contacts"
+	)
+
+	created_by = models.ForeignKey(
+		User,
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name="contacts_created"
+	)
 	type = models.CharField(max_length=16, choices=ContactType.choices, default=ContactType.CUSTOMER)
 
 	name = models.CharField(max_length=255)
