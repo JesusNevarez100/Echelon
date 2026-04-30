@@ -7,7 +7,7 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
             <div>
                 <h1 style="margin-top:0;">
-                    CRM Tasks
+                    Tasks
                 </h1>
 
                 <p class="muted" style="margin: 4px 0 0 0;">
@@ -29,7 +29,7 @@
             <h2 style="margin-top:0;">My Tasks</h2>
 
             {% if my_tasks %}
-                <table class="tasks-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Title</th>
@@ -141,7 +141,7 @@
                                         <button
                                             type="button"
                                             class="btn small view-mode task-view-{{ task.id }}"
-                                            onclick="enableTaskEdit('{{ task.id }}')"
+                                            onclick="enableEdit('task', '{{ task.id }}')"
                                         >
                                             Update
                                         </button>
@@ -158,7 +158,7 @@
                                         <button
                                             type="button"
                                             class="btn small edit-mode task-edit-{{ task.id }}"
-                                            onclick="cancelTaskEdit('{{ task.id }}')"
+                                            onclick="cancelEdit('task', '{{ task.id }}')"
                                             style="display:none;"
                                         >
                                             Cancel
@@ -188,15 +188,15 @@
                 <p class="muted">No tasks assigned to you.</p>
             {% endif %}
         </div>
-    </div>
-
+    {% comment %} </div> {% endcomment %}
     {% if membership.role != "CLIENT" %}
-        <div class="card" style="grid-column: span 12;">
-            <h2 style="margin-top:0;">Company Tasks</h2>
-
+        {% comment %} <div class="card" style="grid-column: span 12;"> {% endcomment %}
+            <br>  
+            
             <div class="card" style="margin-top:16px; overflow-x:auto;">
+              <h2 style="margin-top:0;">Company Tasks</h2>
                 {% if tasks %}
-                    <table class="tasks-table">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -321,7 +321,7 @@
                                             <button
                                                 type="button"
                                                 class="btn small view-mode company-task-view-{{ task.id }}"
-                                                onclick="enableCompanyTaskEdit('{{ task.id }}')"
+                                                onclick="enableEdit('company-task', '{{ task.id }}')"
                                             >
                                                 Update
                                             </button>
@@ -338,7 +338,7 @@
                                             <button
                                                 type="button"
                                                 class="btn small edit-mode company-task-edit-{{ task.id }}"
-                                                onclick="cancelCompanyTaskEdit('{{ task.id }}')"
+                                                onclick="cancelEdit('company-task', '{{ task.id }}')"
                                                 style="display:none;"
                                             >
                                                 Cancel
@@ -370,66 +370,234 @@
             </div>
         </div>
     {% endif %}
+      <div class="card" style="grid-column: span 12;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+            <div>
+                <h1 style="margin-top:0;">
+                    Contacts
+                </h1>
+
+                <p class="muted" style="margin: 4px 0 0 0;">
+                    Company: {{ membership.company.name }} |
+                    Role: {{ membership.get_role_display|default:membership.role }}
+                </p>
+            </div>
+            {% if can_create_contacts %}
+                <div style="margin-top: 8px;">
+                    <a class="btn primary" href="{% url 'crm:create_contact' %}">
+                        Create contact
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="card" style="margin-top:16px; overflow-x:auto;">
+            <h2 style="margin-top:0;">Contacts</h2>
+
+            {% if contacts %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Notes</th>
+                            <th>Created By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for contact in contacts %}
+                            <tr id="contact-row-{{ contact.id }}">
+                                <td>
+                                    <span class="view-mode contact-view-{{ contact.id }}">
+                                        <span class="contact-type {{ contact.type|lower }}">
+                                            {{ contact.get_type_display }}
+                                        </span>
+                                    </span>
+
+                                    <select
+                                        form="contact-form-{{ contact.id }}"
+                                        class="edit-mode contact-edit-{{ contact.id }} table-input"
+                                        name="type"
+                                        style="display:none;"
+                                    >
+                                        {% for value, label in contact_type_choices %}
+                                            <option value="{{ value }}" {% if contact.type == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <span class="view-mode contact-view-{{ contact.id }}">
+                                        <strong>
+                                            {{ contact.name }}
+                                        </strong>
+                                    </span>
+
+                                    <div class="edit-mode contact-edit-{{ contact.id }}" style="display:none;">
+                                        <input
+                                            form="contact-form-{{ contact.id }}"
+                                            class="table-input"
+                                            type="text"
+                                            name="name"
+                                            value="{{ contact.name }}"
+                                            required
+                                            style="margin-bottom:6px;"
+                                        >
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="view-mode contact-view-{{ contact.id }}">
+                                        {% if contact.email %}
+                                            {{ contact.email }}
+                                        {% else %}
+                                            <span class="muted">No email</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <input
+                                        form="contact-form-{{ contact.id }}"
+                                        class="edit-mode contact-edit-{{ contact.id }} table-input"
+                                        type="email"
+                                        name="email"
+                                        value="{{ contact.email|default_if_none:'' }}"
+                                        style="display:none;"
+                                    >
+                                </td>
+
+                                <td>
+                                    <span class="view-mode contact-view-{{ contact.id }}">
+                                        {% if contact.phone %}
+                                            {{ contact.phone }}
+                                        {% else %}
+                                            <span class="muted">No phone</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <input
+                                        form="contact-form-{{ contact.id }}"
+                                        class="edit-mode contact-edit-{{ contact.id }} table-input"
+                                        type="text"
+                                        name="phone"
+                                        value="{{ contact.phone|default_if_none:'' }}"
+                                        style="display:none;"
+                                    >
+                                </td>
+
+                                <td>
+                                    <span class="view-mode contact-view-{{ contact.id }}">
+                                        {% if contact.notes %}
+                                            {{ contact.notes|truncatechars:80 }}
+                                        {% else %}
+                                            <span class="muted">No notes</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <textarea
+                                        form="contact-form-{{ contact.id }}"
+                                        class="edit-mode contact-edit-{{ contact.id }} table-input table-textarea"
+                                        name="notes"
+                                        style="display:none;"
+                                    >{{ contact.notes|default_if_none:"" }}</textarea>
+                                </td>
+
+                                <td>
+                                    {% if contact.created_by %}
+                                        {% if contact.created_by_id == request.user.id %}
+                                            Me
+                                        {% else %}
+                                            {{ contact.created_by.get_full_name|default:contact.created_by.username }}
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="muted">Unknown</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <form id="contact-form-{{ contact.id }}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_contact">
+                                        <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                                    </form>
+
+                                    <div class="actions-cell">
+                                        <button
+                                            type="button"
+                                            class="btn small view-mode contact-view-{{ contact.id }}"
+                                            onclick="enableEdit('contact', '{{ contact.id }}')"
+                                        >
+                                            Update
+                                        </button>
+
+                                        <button
+                                            form="contact-form-{{ contact.id }}"
+                                            type="submit"
+                                            class="btn small edit-mode contact-edit-{{ contact.id }}"
+                                            style="display:none;"
+                                        >
+                                            Save
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="btn small edit-mode contact-edit-{{ contact.id }}"
+                                            onclick="cancelEdit('contact','{{ contact.id }}')"
+                                            style="display:none;"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <form method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_contact">
+                                            <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                                            <button
+                                                type="submit"
+                                                class="btn danger small"
+                                                onclick="return confirm('Delete this contact?');"
+                                            >
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">No contacts found.</p>
+            {% endif %}
+        </div>
+    </div>  
 </div>
 
 <style>
-.tasks-table {
+.data-table {
     width: 100%;
     border-collapse: collapse;
     color: #e6e8ee;
     font-size: 14px;
 }
 
-.tasks-table th,
-.tasks-table td {
+.data-table th,
+.data-table td {
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,.12);
     vertical-align: middle;
 }
 
-.tasks-table th {
+.data-table th {
     background: rgba(255,255,255,.05);
     font-weight: 600;
-}
-
-.tasks-table tbody tr:hover {
-    background: rgba(79,124,255,.1);
-}
-
-.assignee-pill {
-    display: inline-block;
-    margin: 2px 4px 2px 0;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.08);
-    color: #e6e8ee;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status {
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    display: inline-block;
-}
-
-.status.open {
-    color: #8ab4ff;
-}
-
-.status.in_progress {
-    color: #ffd166;
-}
-
-.status.done {
-    color: #4fffc3;
-}
-
-.status.cancelled {
-    color: #ff6b6b;
 }
 
 .table-input {
@@ -464,47 +632,66 @@
     color: #ff6b6b;
     border: 1px solid rgba(255, 107, 107, .35);
 }
+
+.assignee-pill,
+.contact-type,
+.status {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.assignee-pill,
+.contact-type {
+    background: rgba(255,255,255,.08);
+}
+
+.status.open,
+.contact-type.company {
+    color: #8ab4ff;
+}
+
+.status.in_progress,
+.contact-type.lead {
+    color: #ffd166;
+}
+
+.status.done,
+.contact-type.customer {
+    color: #4fffc3;
+}
+
+.status.cancelled {
+    color: #ff6b6b;
+}
+
+.contact-type.other {
+    color: #c7cbe0;
+}
 </style>
 
 <script>
-function enableTaskEdit(taskId) {
-    document.querySelectorAll(".task-view-" + taskId).forEach(function(element) {
+function enableEdit(prefix, id) {
+    document.querySelectorAll("." + prefix + "-view-" + id).forEach(function(element) {
         element.style.display = "none";
     });
 
-    document.querySelectorAll(".task-edit-" + taskId).forEach(function(element) {
+    document.querySelectorAll("." + prefix + "-edit-" + id).forEach(function(element) {
         element.style.display = "";
     });
 }
 
-function cancelTaskEdit(taskId) {
-    document.querySelectorAll(".task-edit-" + taskId).forEach(function(element) {
+function cancelEdit(prefix, id) {
+    document.querySelectorAll("." + prefix + "-edit-" + id).forEach(function(element) {
         element.style.display = "none";
     });
 
-    document.querySelectorAll(".task-view-" + taskId).forEach(function(element) {
+    document.querySelectorAll("." + prefix + "-view-" + id).forEach(function(element) {
         element.style.display = "";
     });
 }
 
-function enableCompanyTaskEdit(taskId) {
-    document.querySelectorAll(".company-task-view-" + taskId).forEach(function(element) {
-        element.style.display = "none";
-    });
-
-    document.querySelectorAll(".company-task-edit-" + taskId).forEach(function(element) {
-        element.style.display = "";
-    });
-}
-
-function cancelCompanyTaskEdit(taskId) {
-    document.querySelectorAll(".company-task-edit-" + taskId).forEach(function(element) {
-        element.style.display = "none";
-    });
-
-    document.querySelectorAll(".company-task-view-" + taskId).forEach(function(element) {
-        element.style.display = "";
-    });
-}
 </script>
 {% endblock %}

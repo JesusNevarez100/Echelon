@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Create Contact{% endblock %}
+
+{% block content %}
+  {% comment %} <div class="card" style="max-width: 800px;">
+    <h1 style="margin-top:0;">Create Task</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="row" style="margin-top:16px;">
+        <button class="btn primary" type="submit">Save Task</button>
+        <a class="btn" href="{% url 'crm:index' %}">Cancel</a>
+      </div>
+    </form>
+  </div> {% endcomment %}
+
+  <div class="grid" style="align-items: start; gap: 24px;">
+
+    <!-- Form -->
+    <div class="card" style="grid-column: span 7; padding:24px;">
+        <h1 style="margin-top:0; font-size:36px; line-height:1.2; margin-bottom:16px;">
+            Create Contact
+        </h1>
+
+        <div class="card" style="padding:20px; background:#1f1f2e; border-radius:12px; margin-top:16px;">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="row" style="margin-top:16px;">
+                  <button class="btn primary" type="submit">Save Contact</button>
+                  <a class="btn" href="{% url 'crm:index' %}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="card" style="grid-column: span 5; padding:24px;">
+        <h2 style="margin-top:0; font-size:24px;">Instructions</h2>
+        <ul class="muted" style="padding-left:20px; margin-top:12px; line-height:1.6;">
+            <li>Fill out contact information</li>
+            <li>You are not creating a user simply a connection.</li>
+            <li>Choose between, company, customer or lead contact type.</li>
+        </ul>
+        <div class="card" style="margin-top:24px; padding:16px; background:#2c2c3a; border-radius:8px;">
+            <div class="muted" style="font-size:14px; line-height:1.5;">
+                Ensure all fields are accurate.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+input, textarea {
+    width: 100%;
+    box-sizing: border-box; /* ensures padding & border stay inside */
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.03);
+    color: #e6e8ee;
+    font-size: 14px;
+    transition: border 0.2s, background 0.2s;
+}
+
+textarea {
+    resize: none; /* prevent user resizing */
+}
+
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0; /* remove default spacing */
+    cursor: pointer;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #4f7cff;
+    background: rgba(79,124,255,.05);
+}
+
+button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #4f7cff;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Card Styling */
+.card {
+    background: #2c2c3a;
+    border-radius: 12px;
+}
+</style>
+
+{% endblock %}

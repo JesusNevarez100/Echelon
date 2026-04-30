@@ -162,3 +162,17 @@ class TaskForm(forms.ModelForm):
         
         return assigned_to
 
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = [
+            "type",
+            "name",
+            "email",
+            "phone",
+            "notes"
+        ]
+
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows":3}),
+        }

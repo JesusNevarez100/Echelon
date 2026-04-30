@@ -6,8 +6,8 @@ from django.views import View
 
 from accounts.models import Membership
 from accounts.services import get_primary_membership
-from .forms import TaskForm, TaskInlineUpdateForm
-from .models import Task
+from .forms import TaskForm, TaskInlineUpdateForm, ContactForm
+from .models import Task, Contact
 
 def _can_create_tasks(membership):
     return membership.role in {
@@ -34,6 +34,40 @@ def _can_delete_task(membership):
         Membership.Role.MANAGER,
     }
 
+def _can_create_contacts(membership):
+    return membership.role in {
+        Membership.Role.ADMIN,
+        Membership.Role.MANAGER,
+        Membership.Role.STAFF,
+        Membership.Role.CLIENT
+    }
+
+def _can_edit_contact(user, membership, contact):
+    if membership.role in {Membership.Role.ADMIN, Membership.Role.MANAGER}:
+        return True
+
+    if membership.role in {Membership.Role.STAFF, Membership.Role.MANAGER}:
+        return contact.created_by_id == user.id
+
+    return False
+def _can_edit_contact(user, membership, contact):
+    if membership.role in {Membership.Role.ADMIN, Membership.Role.MANAGER}:
+        return True
+
+    if membership.role in {Membership.Role.STAFF, Membership.Role.CLIENT}:
+        return contact.created_by_id == user.id
+
+    return False
+
+def _can_delete_contact(user, membership, contact):
+    if membership.role in {Membership.Role.ADMIN, Membership.Role.MANAGER}:
+        return True
+
+    if membership.role in {Membership.Role.STAFF, Membership.Role.CLIENT}:
+        return contact.created_by_id == user.id
+
+    return False
+
 @method_decorator(login_required, name="dispatch")
 class CRMIndexView(View):
     template_name = "crm/index.html"
@@ -51,6 +85,19 @@ class CRMIndexView(View):
     def _get_membership(self, request):
         return get_primary_membership(request.user)
     
+    def _get_contacts(self, request, membership):
+        contacts = Contact.objects.filter(
+            company=membership.company
+        ).select_related(
+            "created_by",
+            "company"
+        )
+        
+        if membership.role == Membership.Role.CLIENT:
+            contacts = contacts.filter(created_by=request.user)
+        
+        return contacts.order_by("name", "-created_at")
+
     def _get_base_tasks(self, membership):
         return Task.objects.filter(
             company=membership.company
@@ -82,14 +129,22 @@ class CRMIndexView(View):
         
         tasks = self._get_visible_tasks(request, membership)
         my_tasks = self._get_my_tasks(request, membership)
+        contacts = self._get_contacts(request, membership)
 
         return render(request, self.template_name, {
             "membership":membership,
+
+            # Tasks
             "tasks": tasks,
             "my_tasks": my_tasks,
             "can_create_tasks": _can_create_tasks(membership),
             "can_delete_tasks": _can_delete_task(membership),
             "task_status_choices": Task.Status.choices,
+
+            # Contacts
+            "contacts": contacts,
+            "contact_type_choices": Contact.ContactType.choices,
+            "can_create_contacts": _can_create_contacts(membership),
         })
     def post(self, request, *args, **kwargs):
         membership = self._get_membership(request)
@@ -108,6 +163,57 @@ class CRMIndexView(View):
             id=task_id,
             company=membership.company
         )
+        
+        if action == "create_contact":
+            if not _can_create_contacts(membership):
+                return HttpResponseForbidden("You do not have permission to create a contact.")
+
+            form = ContactForm(request.POST)
+            if form.is_valid():
+                contact = form.save(commit=False)
+                contact.company = membership.company
+                contact.created_by = request.user
+                contact.save()
+        
+        elif action == "update_contact":
+            contact_id = request.POST.get("contact_id")
+
+            if not contact_id:
+                return redirect("crm:index")
+            
+            contact = get_object_or_404(
+                Contact,
+                id=contact_id,
+                company=membership.company
+            )
+
+            if not _can_edit_contact(request.user, membership, contact):
+                return HttpResponseForbidden("You do not have permission to edit this contact.")
+            
+            form = ContactForm(request.POST, instance=contact)
+
+            if form.is_valid():
+                updated_contact = form.save(commit=False)
+                updated_contact.company = membership.company
+                updated_contact.created_by = contact.created_by
+                updated_contact.save()
+
+        elif action == "delete_contact":
+            contact_id = request.POST.get("contact_id")
+
+            if not contact_id:
+                return redirect("crm:index")
+            
+            contact = get_object_or_404(
+                Contact,
+                id=contact_id,
+                company=membership.company
+            )
+
+            if not _can_delete_contact(request.user, membership, contact):
+                return HttpResponseForbidden("You do not have permission to delete this action.")
+            
+            contact.delete()
 
         if action == "update_status":
             if not _can_edit_task(request.user, membership, task):
@@ -147,11 +253,51 @@ class CRMIndexView(View):
                 return HttpResponseForbidden("You do not have permission to delete this task.")
             
             task.delete()
-        
+
         return redirect("crm:index")
     
 index = CRMIndexView.as_view()
+
+
+@login_required
+def create_contact(request):
+    membership = get_primary_membership(request.user)
+    if membership is None:
+        return HttpResponseForbidden("No company membership recognized.")
     
+    if not _can_create_contacts(membership):
+        return HttpResponseForbidden("You do not have permission to create contacts")
+    company = membership.company
+
+    contact_instance = Contact(
+        company=company,
+        created_by=request.user
+    )
+
+    if request.method == "POST":
+        form = ContactForm(
+            request.POST,
+            instance=contact_instance,
+        )
+
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.company = company
+            task.created_by = request.user
+            task.save()
+
+            return redirect("crm:index")
+        
+    else:
+        form = ContactForm(
+            instance=contact_instance
+        )
+    
+    return render(request, "crm/create_contact.html", {
+        "form":form,
+        "membership":membership,
+    }) 
+
 @login_required
 def create_task(request):
     membership = get_primary_membership(request.user)
