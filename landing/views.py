@@ -19,24 +19,24 @@ def landing(request):
 #This code manages the functionality of the blocks
 @login_required
 def dashboard(request):
-    cards = [
-        get_crm_summary(request),
-        get_services_summary(request),
-        get_scheduling_summary(request),
-        get_billing_summary(request),
-    ]
-    left_cards = []
-    right_cards = []
+    # cards = [
+    #     get_crm_summary(request),
+    #     get_services_summary(request),
+    #     get_scheduling_summary(request),
+    #     get_billing_summary(request),
+    # ]
+    # left_cards = []
+    # right_cards = []
 
-    for card in cards:
-        if card["name"] in ["Scheduling", "Billing & Invoices"]:
-            right_cards.append(card)
-        else:
-            left_cards.append(card)
+    # for card in cards:
+    #     if card["name"] in ["Scheduling", "Billing & Invoices"]:
+    #         right_cards.append(card)
+    #     else:
+    #         left_cards.append(card)
 
     return render(request, "landing/dashboard.html", {
-        "left_cards": left_cards,
-        "right_cards": right_cards,
+        # "left_cards": left_cards,
+        # "right_cards": right_cards,
     })
 
 #-------------

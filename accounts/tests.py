@@ -42,7 +42,7 @@ class AccountViewsTests(TestCase):
         Membership.objects.create(
             user=self.other_user,
             company=self.other_company,
-            role=Membership.Role.ADMIN,
+            role=Membership.Role.CLIENT,
         )
 
     def test_account_detail_displays_current_user(self):

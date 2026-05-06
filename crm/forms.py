@@ -43,7 +43,7 @@ def get_grouped_assignable_users(membership):
         Membership.objects
         .filter(company=company)
         .select_related("user")
-        .exclude(role=Membership.Role.ADMIN)
+        # .exclude(role=Membership.Role.ADMIN)
     )
 
     if membership.role == Membership.Role.CLIENT:
@@ -52,7 +52,7 @@ def get_grouped_assignable_users(membership):
         memberships = memberships.filter(
             Q(user=membership.user) | Q(role=Membership.Role.CLIENT)
         )
-    elif membership.role == Membership.Role.MANAGER:
+    elif membership.role == Membership.Role.MANAGER or membership.role == Membership.Role.ADMIN:
         # Managers can assign to everyone except admins
         pass
     else:

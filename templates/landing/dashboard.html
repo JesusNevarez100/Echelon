@@ -2,21 +2,28 @@
 {% block title %}Echelon{% endblock %}
 
 {% block content %}
-  <h1 style="margin-top:0;">Welcome {{ request.user.username}} <i class="bi bi-tsunami"></i></h1>
-  <p class="muted">Choose a module.</p>
-  {% if user.is_authenticated %}
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+    <div>
+      <h1 style="margin-top:0;">Welcome {{ request.user.username}} <i class="bi bi-tsunami"></i></h1>
+      <p class="muted">Choose a module.</p>
+    </div>
+    {% if user.is_authenticated %}
     <div style="margin: 16px 0;">
       <a class="btn" href="/apps/accounts/create-user/"><i class="bi bi-person-plus"></i></a>
-      <a class="btn" href="{% url 'accounts_custom:account_detail' %}">Account Details </a>
-
+      <a class="btn" href="{% url 'accounts_custom:account_detail' %}"><i class="bi bi-person"></i> </a>
+      
     </div>
-  {% endif %}
+    {% endif %}
+  </div>
 
   <div class="grid">
-    <a class="card" style="grid-column: span 6;" href="/crm/">
-      <h2 style="margin:0 0 6px 0;"><i class="bi bi-clipboard"></i> CRM</h2>
-      <div class="muted">Contacts + Tasks</div>
-    </a>
+    <div class="card" style="grid-column: span 6">
+    {% comment %} <a class="card" style="grid-column: span 6;" href="/crm/"> {% endcomment %}
+      <a href="{% url 'crm:index' %}"><h2 style="margin:0 0 6px 0;"><i class="bi bi-clipboard"></i> CRM</h2><a>
+      <div class="muted"><a href="{% url 'crm:create_contact' %}">Create Contact</a> + Tasks</div>
+
+    {% comment %} </a> {% endcomment %}
+    </div>  
 
     <a class="card" style="grid-column: span 6;" href="{% url 'services:services_home'  %}">
       <h2 style="margin:0 0 6px 0;"><i class="bi bi-bag"></i> Services</h2>
