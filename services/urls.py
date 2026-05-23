@@ -6,7 +6,7 @@ from . import views
 app_name = "services"
 
 urlpatterns = [
-    path("/", views.displayServices, name="services_home"),
-    path("/create/", views.createService, name="create_service")
+    path("", views.displayServices, name="services_home"),
+    path("create/", views.createService, name="create_service")
 ]
 
