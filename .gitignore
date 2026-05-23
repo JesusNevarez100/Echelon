@@ -1,18 +1,29 @@
-db.sqlite3
-# Local Python Environment
-EchelonEnv/
-venv/
-.env/
-__pychache__/*.pyc
-.DS_Store
-
-# Local Python environment
-EchelonEnv/
-venv/
-.env/
+cat > .gitignore <<'EOF'
+# Python
 __pycache__/
 *.pyc
-.DS_Store
+*.pyo
+*.pyd
 
-__pycache__/
-*.py[cod]
+# Virtual envs
+venv/
+env/
+EchelonEnv/
+.venv/
+
+# Django/local
+db.sqlite3
+media/
+staticfiles/
+*.log
+.env
+
+# macOS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Node/cache
+node_modules/
+.cache/
+EOF
