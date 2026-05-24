@@ -9,3 +9,4 @@ gunicorn
 whitenoise
 sqlparse
 tzdata
+gunicorn==26.0.0
