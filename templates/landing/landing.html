@@ -19,32 +19,78 @@
   </div>
 </section>
 
-<section class="product-preview" aria-label="Echelon workspace preview">
+{% comment %} <section class="product-preview" aria-label="Echelon workspace preview">
   <div class="preview-sidebar">
     <div class="preview-brand">ECHELON</div>
-    <div class="preview-nav active">Dashboard</div>
-    <div class="preview-nav">CRM</div>
-    <div class="preview-nav">Services</div>
-    <div class="preview-nav">Scheduling</div>
-    <div class="preview-nav">Billing</div>
+    <div class="preview-nav active"><i class="bi bi-grid-1x2"></i> Dashboard</div>
+    <div class="preview-nav"><i class="bi bi-people"></i> CRM</div>
+    <div class="preview-nav"><i class="bi bi-bag-check"></i> Services</div>
+    <div class="preview-nav"><i class="bi bi-calendar2-week"></i> Scheduling</div>
+    <div class="preview-nav"><i class="bi bi-receipt"></i> Billing</div>
+    <div class="preview-account">
+      <span class="account-dot">EN</span>
+      <div>
+        <strong>Executive North</strong>
+        <span>Manager workspace</span>
+      </div>
+    </div>
   </div>
   <div class="preview-main">
     <div class="preview-topline">
-      <span>Today</span>
-      <span class="preview-pill">Company scoped</span>
+      <div>
+        <strong>Operations Dashboard</strong>
+        <span>Friday, May 29</span>
+      </div>
+      <div class="preview-actions">
+        <span class="preview-pill">Company scoped</span>
+        <span class="preview-pill success">Secure access</span>
+      </div>
     </div>
     <div class="preview-stats">
       <div><strong>12</strong><span>Open tasks</span></div>
       <div><strong>4</strong><span>Meeting requests</span></div>
       <div><strong>8</strong><span>Invoices</span></div>
+      <div><strong>23</strong><span>Active clients</span></div>
     </div>
-    <div class="preview-list">
-      <div><span class="dot green"></span> Client onboarding call accepted</div>
-      <div><span class="dot blue"></span> Website maintenance requested</div>
-      <div><span class="dot amber"></span> Draft invoice awaiting review</div>
+    <div class="preview-content">
+      <div class="preview-panel">
+        <div class="preview-panel-head">
+          <strong>Needs attention</strong>
+          <span>Priority queue</span>
+        </div>
+        <div class="preview-list">
+          <div>
+            <span class="dot green"></span>
+            <strong>Client onboarding call accepted</strong>
+            <small>Today at 2:00 PM</small>
+          </div>
+          <div>
+            <span class="dot blue"></span>
+            <strong>Website maintenance requested</strong>
+            <small>Service request from Acme Studio</small>
+          </div>
+          <div>
+            <span class="dot amber"></span>
+            <strong>Draft invoice awaiting review</strong>
+            <small>Invoice #1048 · $1,250.00</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-panel-head">
+          <strong>Meeting pipeline</strong>
+          <span>Private visibility</span>
+        </div>
+        <div class="preview-timeline">
+          <div><span></span><strong>Requested</strong><small>Client submits topic</small></div>
+          <div><span></span><strong>Accepted</strong><small>Staff sets time and participants</small></div>
+          <div><span></span><strong>Scheduled</strong><small>Visible only to involved users</small></div>
+        </div>
+      </div>
     </div>
   </div>
-</section>
+</section> {% endcomment %}
 
 <section class="feature-grid">
   <article class="feature-card">
@@ -82,6 +128,67 @@
     <strong>Operational focus</strong>
     <span>Designed around the daily work of managing clients.</span>
   </div>
+</section>
+
+<section class="workflow-section">
+  <div class="section-copy">
+    <div class="eyebrow">Built for daily operations</div>
+    <h2>Move client work from request to resolution without losing context.</h2>
+    <p>
+      Echelon keeps the common CRM workflow connected: capture client activity,
+      review requests, schedule the right people, complete the work, and keep
+      billing close to the source record.
+    </p>
+  </div>
+
+  <div class="workflow-steps">
+    <div class="workflow-step">
+      <span>01</span>
+      <strong>Capture</strong>
+      <p>Create contacts, tasks, services, and client meeting requests.</p>
+    </div>
+    <div class="workflow-step">
+      <span>02</span>
+      <strong>Coordinate</strong>
+      <p>Assign staff, approve scheduling details, and keep participants scoped.</p>
+    </div>
+    <div class="workflow-step">
+      <span>03</span>
+      <strong>Complete</strong>
+      <p>Track status changes and move completed work toward invoices.</p>
+    </div>
+  </div>
+</section>
+
+<section class="role-section">
+  <div class="role-card">
+    <i class="bi bi-shield-lock"></i>
+    <div>
+      <h2>Designed around permissions</h2>
+      <p>
+        Staff and managers get operational controls. Clients get a focused portal
+        for requests, meetings, tasks, and invoices.
+      </p>
+    </div>
+  </div>
+  <div class="role-list">
+    <div><strong>Admin</strong><span>Manage company users and high-level access.</span></div>
+    <div><strong>Manager</strong><span>Coordinate services, schedules, and client work.</span></div>
+    <div><strong>Staff</strong><span>Handle assigned tasks and private client meetings.</span></div>
+    <div><strong>Client</strong><span>Request services, request meetings, and view their work.</span></div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div>
+    <h2>Ready to get back to the work that matters?</h2>
+    <p>Open Echelon and manage today’s clients, requests, meetings, and invoices from one place.</p>
+  </div>
+  {% if user.is_authenticated %}
+    <a class="btn primary" href="/dashboard/">Open Dashboard</a>
+  {% else %}
+    <a class="btn primary" href="/accounts/login/">Sign In</a>
+  {% endif %}
 </section>
 
 <style>
@@ -131,6 +238,8 @@
 }
 
 .preview-sidebar {
+  display: flex;
+  flex-direction: column;
   padding: 18px;
   background: rgba(0,0,0,.22);
   border-right: 1px solid rgba(255,255,255,.08);
@@ -142,15 +251,53 @@
 }
 
 .preview-nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   padding: 10px 12px;
   border-radius: 8px;
   color: rgba(230,232,238,.72);
   font-size: 14px;
 }
 
+.preview-nav i {
+  color: #7dd3fc;
+}
+
 .preview-nav.active {
   color: #ffffff;
   background: rgba(79,124,255,.20);
+}
+
+.preview-account {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 18px;
+  color: rgba(230,232,238,.72);
+  font-size: 12px;
+}
+
+.account-dot {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(125,211,252,.16);
+  color: #7dd3fc;
+  font-weight: 900;
+}
+
+.preview-account strong,
+.preview-account span {
+  display: block;
+}
+
+.preview-account strong {
+  color: #ffffff;
+  font-size: 13px;
 }
 
 .preview-main {
@@ -161,8 +308,31 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  align-items: flex-start;
   margin-bottom: 18px;
   color: rgba(230,232,238,.76);
+}
+
+.preview-topline strong,
+.preview-topline span {
+  display: block;
+}
+
+.preview-topline strong {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.preview-topline span {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .preview-pill {
@@ -172,9 +342,15 @@
   font-size: 12px;
 }
 
+.preview-pill.success {
+  color: #bbf7d0;
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.10);
+}
+
 .preview-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -197,9 +373,68 @@
   font-size: 14px;
 }
 
-.preview-list {
+.preview-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(240px, .75fr);
+  gap: 12px;
+}
+
+.preview-panel {
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.preview-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.preview-panel-head strong,
+.preview-panel-head span {
+  display: block;
+}
+
+.preview-panel-head span {
+  color: rgba(230,232,238,.62);
+  font-size: 12px;
+}
+
+.preview-list,
+.preview-timeline {
   display: grid;
   gap: 10px;
+}
+
+.preview-list div,
+.preview-timeline div {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(0,0,0,.16);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.preview-list strong,
+.preview-list small,
+.preview-timeline strong,
+.preview-timeline small {
+  display: block;
+}
+
+.preview-list strong,
+.preview-timeline strong {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.preview-list small,
+.preview-timeline small {
+  margin-top: 4px;
+  color: rgba(230,232,238,.62);
 }
 
 .dot {
@@ -213,6 +448,21 @@
 .green { background: #22c55e; }
 .blue { background: #4f7cff; }
 .amber { background: #f59e0b; }
+
+.preview-timeline div {
+  position: relative;
+  padding-left: 34px;
+}
+
+.preview-timeline div > span {
+  position: absolute;
+  left: 12px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #7dd3fc;
+}
 
 .feature-grid {
   display: grid;
@@ -273,11 +523,164 @@
   font-size: 14px;
 }
 
+.workflow-section {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 32px;
+}
+
+.section-copy h2 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.section-copy p {
+  color: rgba(230,232,238,.74);
+  line-height: 1.6;
+  margin: 14px 0 0;
+}
+
+.workflow-steps {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-step {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px 14px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #2c2c3a;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.workflow-step span {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(79,124,255,.18);
+  color: #9db7ff;
+  font-weight: 800;
+}
+
+.workflow-step strong {
+  font-size: 17px;
+}
+
+.workflow-step p {
+  margin: 0;
+  color: rgba(230,232,238,.72);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.role-section {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.role-card,
+.role-list {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  background: #1f1f2e;
+}
+
+.role-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+}
+
+.role-card i {
+  color: #7dd3fc;
+  font-size: 28px;
+}
+
+.role-card h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.role-card p {
+  margin: 10px 0 0;
+  color: rgba(230,232,238,.72);
+  line-height: 1.6;
+}
+
+.role-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.role-list div {
+  padding: 16px;
+  background: #1f1f2e;
+}
+
+.role-list strong,
+.role-list span {
+  display: block;
+}
+
+.role-list span {
+  margin-top: 6px;
+  color: rgba(230,232,238,.70);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.final-cta {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  margin-top: 28px;
+  padding: 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(79,124,255,.35);
+  background: rgba(79,124,255,.12);
+}
+
+.final-cta h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.final-cta p {
+  margin: 8px 0 0;
+  color: rgba(230,232,238,.74);
+  line-height: 1.5;
+}
+
 @media (max-width: 860px) {
   .product-preview,
   .feature-grid,
-  .trust-band {
+  .trust-band,
+  .workflow-section,
+  .role-section,
+  .role-list {
     grid-template-columns: 1fr;
+  }
+
+  .final-cta {
+    display: block;
+  }
+
+  .final-cta .btn {
+    margin-top: 14px;
   }
 
   .preview-sidebar {
@@ -287,6 +690,19 @@
 
   .preview-stats {
     grid-template-columns: 1fr;
+  }
+
+  .preview-content {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-topline {
+    display: block;
+  }
+
+  .preview-actions {
+    justify-content: flex-start;
+    margin-top: 12px;
   }
 
   .landing-hero h1 {
