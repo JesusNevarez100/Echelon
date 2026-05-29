@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block title %}Create Meeting{% endblock %}
+
+{% block content %}
+<div class="grid meeting-create-grid">
+    <div class="card form-shell">
+        <h1>{% if is_client_request %}Request Meeting{% else %}Create Meeting{% endif %}</h1>
+
+        <div class="card form-panel">
+            <form method="post" class="meeting-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="error form-wide">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {% for field in form %}
+                    {% if field.name == "participants" %}
+                        <section class="participants-panel form-wide">
+                            <div class="section-heading">
+                                <h2>{{ field.label }}</h2>
+                                <span class="muted">Company users</span>
+                            </div>
+                            <div class="participants-list">
+                                {{ field }}
+                            </div>
+                            {% if field.help_text %}
+                                <div class="muted field-help">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="error">{{ field.errors }}</div>
+                            {% endif %}
+                        </section>
+                    {% else %}
+                        <div class="{% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% else %}form-field{% endif %}{% if field.name == 'billing_type' or field.name == 'bill_rate_cents' or field.name == 'billable_minutes_override' %} billable-field{% endif %}">
+                            {% if field.field.widget.input_type == 'checkbox' %}
+                                <label>
+                                    {{ field }}
+                                    {{ field.label }}
+                                </label>
+                            {% else %}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <div class="muted field-help">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="error">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="form-actions form-wide">
+                    <button type="submit" class="btn primary">{% if is_client_request %}Submit Request{% else %}Create Meeting{% endif %}</button>
+                    <a href="{% url 'scheduling:index' %}" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <aside class="card instructions-panel">
+        <h2>Instructions</h2>
+        <ul class="muted">
+            {% if is_client_request %}
+                <li>Describe the meeting you want to request.</li>
+                <li>A staff member will choose the time and participants.</li>
+                <li>Your request is not scheduled until it is accepted.</li>
+            {% else %}
+                <li>Fill out the meeting details.</li>
+                <li>Select company users who should participate.</li>
+                <li>Use billing only when the meeting should appear on invoices.</li>
+            {% endif %}
+        </ul>
+        <div class="card note-panel">
+            <div class="muted">
+                {% if is_client_request %}
+                    Clients can request a meeting, but staff complete scheduling details before it becomes active.
+                {% else %}
+                    Participant labels include each user's role, such as Manager, Staff, or Client.
+                {% endif %}
+            </div>
+        </div>
+    </aside>
+</div>
+
+<style>
+.meeting-create-grid {
+    align-items: start;
+    gap: 24px;
+}
+
+.form-shell {
+    grid-column: span 7;
+    padding: 24px;
+}
+
+.form-shell h1 {
+    margin-top: 0;
+    font-size: 36px;
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+
+.form-panel {
+    padding: 20px;
+    background: #1f1f2e;
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.meeting-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.form-wide,
+.form-field:nth-of-type(2),
+.form-field:nth-of-type(4),
+.form-field:nth-of-type(5) {
+    grid-column: 1 / -1;
+}
+
+.form-field label,
+.checkbox-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #c9ced8;
+}
+
+.form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.03);
+    color: #e6e8ee;
+    font-size: 14px;
+    transition: border 0.2s, background 0.2s;
+}
+
+textarea.form-input {
+    resize: none;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4f7cff;
+    background: rgba(79,124,255,.05);
+}
+
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+.checkbox-field label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0;
+}
+
+.checkbox-input,
+.checkbox-field input,
+.participants-list input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.participants-panel {
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.035);
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.participants-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.participants-list li {
+    margin: 0;
+}
+
+.participants-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    color: #e6e8ee;
+    font-weight: 600;
+}
+
+.participants-list label:hover {
+    border-color: rgba(79,124,255,.55);
+    background: rgba(79,124,255,.08);
+}
+
+.field-help {
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.instructions-panel {
+    grid-column: span 5;
+    padding: 24px;
+}
+
+.instructions-panel h2 {
+    margin-top: 0;
+    font-size: 24px;
+}
+
+.instructions-panel ul {
+    padding-left: 20px;
+    margin-top: 12px;
+    line-height: 1.6;
+}
+
+.note-panel {
+    margin-top: 24px;
+    padding: 16px;
+    background: #2c2c3a;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+button {
+    border: none;
+}
+
+@media (max-width: 980px) {
+    .form-shell,
+    .instructions-panel {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 720px) {
+    .meeting-form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-field,
+    .checkbox-field,
+    .form-wide {
+        grid-column: 1 / -1;
+    }
+}
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const billableToggle = document.getElementById("id_is_billable");
+        const billableFields = document.querySelectorAll(".billable-field");
+
+        function syncBillableFields() {
+            if (!billableToggle) return;
+            billableFields.forEach((field) => {
+                field.hidden = !billableToggle.checked;
+            });
+        }
+
+        if (billableToggle) {
+            billableToggle.addEventListener("change", syncBillableFields);
+            syncBillableFields();
+        }
+    });
+</script>
+{% endblock %}

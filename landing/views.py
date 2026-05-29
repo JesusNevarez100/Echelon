@@ -19,24 +19,112 @@ def landing(request):
 #This code manages the functionality of the blocks
 @login_required
 def dashboard(request):
-    # cards = [
-    #     get_crm_summary(request),
-    #     get_services_summary(request),
-    #     get_scheduling_summary(request),
-    #     get_billing_summary(request),
-    # ]
-    # left_cards = []
-    # right_cards = []
+    membership = get_primary_membership(request.user)
+    if membership is None:
+        return HttpResponseForbidden("No company membership recognized.")
 
-    # for card in cards:
-    #     if card["name"] in ["Scheduling", "Billing & Invoices"]:
-    #         right_cards.append(card)
-    #     else:
-    #         left_cards.append(card)
+    company = membership.company
+    is_client = membership.role == Membership.Role.CLIENT
+    today = now()
+
+    visible_meetings = Meeting.objects.filter(company=company)
+    if is_client:
+        visible_meetings = visible_meetings.filter(
+            models.Q(requested_by=request.user) |
+            models.Q(participants__user=request.user)
+        ).distinct()
+    else:
+        visible_meetings = visible_meetings.filter(
+            models.Q(status=Meeting.Status.REQUESTED) |
+            models.Q(organizer=request.user) |
+            models.Q(participants__user=request.user)
+        ).distinct()
+
+    upcoming_meetings = (
+        visible_meetings
+        .filter(status=Meeting.Status.ACTIVE, start_at__gte=today)
+        .order_by("start_at")[:4]
+    )
+    pending_meetings = visible_meetings.filter(status=Meeting.Status.REQUESTED).order_by("-created_at")[:4]
+
+    tasks = (
+        Task.objects
+        .filter(company=company)
+        .exclude(status__in=[Task.Status.DONE, Task.Status.CANCELLED])
+    )
+    if is_client:
+        tasks = tasks.filter(assigned_to=request.user)
+    else:
+        tasks = tasks.filter(models.Q(assigned_to=request.user) | models.Q(created_by=request.user))
+    tasks = tasks.order_by("due_at", "-created_at")[:4]
+
+    if is_client:
+        service_requests_qs = ServiceRequest.objects.filter(company=company, requested_by=request.user)
+        invoices_qs = Invoice.objects.filter(company=company, client=request.user)
+    else:
+        service_requests_qs = ServiceRequest.objects.filter(company=company)
+        invoices_qs = Invoice.objects.filter(company=company)
+
+    recent_service_requests = service_requests_qs.select_related("service", "requested_by").order_by("-requested_at")[:4]
+    recent_invoices = invoices_qs.select_related("client").order_by("-issued_at")[:4]
+
+    open_tasks_count = Task.objects.filter(company=company).exclude(status__in=[Task.Status.DONE, Task.Status.CANCELLED])
+    if is_client:
+        open_tasks_count = open_tasks_count.filter(assigned_to=request.user)
+    else:
+        open_tasks_count = open_tasks_count.filter(models.Q(assigned_to=request.user) | models.Q(created_by=request.user))
+
+    stats = [
+        {"label": "Open Tasks", "value": open_tasks_count.count()},
+        {"label": "Pending Meetings", "value": visible_meetings.filter(status=Meeting.Status.REQUESTED).count()},
+        {"label": "Service Requests", "value": service_requests_qs.exclude(status=ServiceRequest.Status.COMPLETED).count()},
+        {"label": "Draft Invoices", "value": invoices_qs.filter(status=Invoice.Status.DRAFT).count()},
+    ]
+
+    modules = [
+        {"name": "CRM", "icon": "bi-clipboard-check", "desc": "Contacts, tasks, and follow-through.", "url": reverse("crm:index")},
+        {"name": "Services", "icon": "bi-bag-check", "desc": "Catalog items and client requests.", "url": reverse("services:services_home")},
+        {"name": "Scheduling", "icon": "bi-calendar2-week", "desc": "Private meetings and requests.", "url": reverse("scheduling:index")},
+        {"name": "Billing", "icon": "bi-receipt-cutoff", "desc": "Invoices, totals, and line items.", "url": reverse("billing:display_invoices")},
+    ]
+
+    if is_client:
+        quick_actions = [
+            {"label": "Request Meeting", "url": reverse("scheduling:create_meeting"), "icon": "bi-calendar-plus"},
+            {"label": "Request Service", "url": reverse("services:services_home"), "icon": "bi-bag-plus"},
+            {"label": "View Tasks", "url": reverse("crm:index"), "icon": "bi-check2-square"},
+            {"label": "View Invoices", "url": reverse("billing:display_invoices"), "icon": "bi-receipt"},
+        ]
+    else:
+        quick_actions = [
+            {"label": "Create Contact", "url": reverse("crm:create_contact"), "icon": "bi-person-lines-fill"},
+            {"label": "Create Task", "url": reverse("crm:create_task"), "icon": "bi-check2-square"},
+            {"label": "Create Meeting", "url": reverse("scheduling:create_meeting"), "icon": "bi-calendar-plus"},
+            {"label": "Services", "url": reverse("services:services_home"), "icon": "bi-bag-plus"},
+        ]
+
+    invoice_cards = [
+        {
+            "id": invoice.id,
+            "status": invoice.status,
+            "total": f"{invoice.total_cents / 100:.2f}",
+        }
+        for invoice in recent_invoices
+    ]
 
     return render(request, "landing/dashboard.html", {
-        # "left_cards": left_cards,
-        # "right_cards": right_cards,
+        "membership": membership,
+        "company": company,
+        "stats": stats,
+        "modules": modules,
+        "quick_actions": quick_actions,
+        "upcoming_meetings": upcoming_meetings,
+        "pending_meetings": pending_meetings,
+        "tasks": tasks,
+        "recent_service_requests": recent_service_requests,
+        "recent_invoices": invoice_cards,
+        "is_client": is_client,
+        "can_manage_users": not is_client,
     })
 
 #-------------

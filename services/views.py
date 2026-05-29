@@ -115,7 +115,11 @@ class DisplayServicesView(View):
             service_request.delete()
 
         return redirect("services:services_home")
+
+
 displayServices = DisplayServicesView.as_view()
+
+# Bug: Anyone can create Service
 def createService(request):
     # membership = get_object_or_404(Membership, pk=membership_id)
     membership = get_primary_membership(request.user)

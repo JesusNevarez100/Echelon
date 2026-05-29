@@ -28,6 +28,7 @@ class Invoice(models.Model):
 	total_cents = models.BigIntegerField(default=0)
 
 	service_requested_id = models.BigIntegerField(blank=True, null=True)
+	meeting_requested_id = models.BigIntegerField(blank=True, null=True)
 
 	def __str__(self) -> str:
 		return f"Invoice #{self.id} ({self.company.name}) - {self.status}"

@@ -1,43 +1,337 @@
 {% extends "base.html" %}
-{% block title %}Echelon{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
-    <div>
-      <h1 style="margin-top:0;">Welcome {{ request.user.username}} <i class="bi bi-tsunami"></i></h1>
-      <p class="muted">Choose a module.</p>
-    </div>
-    {% if user.is_authenticated %}
-    <div style="margin: 16px 0;">
-      <a class="btn" href="/apps/accounts/create-user/"><i class="bi bi-person-plus"></i></a>
-      <a class="btn" href="{% url 'accounts_custom:account_detail' %}"><i class="bi bi-person"></i> </a>
-      
-    </div>
+<section class="dashboard-header">
+  <div>
+    <div class="eyebrow">{{ company.name }}</div>
+    <h1>Good to see you, {{ request.user.get_full_name|default:request.user.username }}</h1>
+    <p class="muted">{{ membership.get_role_display }} workspace overview</p>
+  </div>
+  <div class="header-actions">
+    {% if can_manage_users %}
+      <a class="btn" href="/apps/accounts/create-user/"><i class="bi bi-person-plus"></i> New User</a>
     {% endif %}
+    <a class="btn" href="{% url 'accounts_custom:account_detail' %}"><i class="bi bi-person"></i> Profile</a>
+  </div>
+</section>
+
+<section class="stats-grid">
+  {% for stat in stats %}
+    <div class="stat-card">
+      <span>{{ stat.label }}</span>
+      <strong>{{ stat.value }}</strong>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="dashboard-layout">
+  <div class="main-column">
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Needs Attention</h2>
+        <span class="muted">Today</span>
+      </div>
+
+      <div class="activity-grid">
+        <div class="activity-card">
+          <h3>Upcoming Meetings</h3>
+          {% for meeting in upcoming_meetings %}
+            <a class="activity-row" href="{% url 'scheduling:index' %}">
+              <span class="activity-title">{{ meeting.title }}</span>
+              <span class="activity-meta">{{ meeting.start_at|date:"M d, g:i A" }}</span>
+            </a>
+          {% empty %}
+            <div class="empty-state">No upcoming meetings.</div>
+          {% endfor %}
+        </div>
+
+        <div class="activity-card">
+          <h3>Pending Meetings</h3>
+          {% for meeting in pending_meetings %}
+            <a class="activity-row" href="{% url 'scheduling:index' %}">
+              <span class="activity-title">{{ meeting.title }}</span>
+              <span class="activity-meta">Requested by {{ meeting.requested_by|default:"client" }}</span>
+            </a>
+          {% empty %}
+            <div class="empty-state">No pending meeting requests.</div>
+          {% endfor %}
+        </div>
+
+        <div class="activity-card">
+          <h3>Tasks</h3>
+          {% for task in tasks %}
+            <a class="activity-row" href="{% url 'crm:index' %}">
+              <span class="activity-title">{{ task.title }}</span>
+              <span class="activity-meta">{{ task.get_status_display }}{% if task.due_at %} · due {{ task.due_at|date:"M d" }}{% endif %}</span>
+            </a>
+          {% empty %}
+            <div class="empty-state">No open tasks assigned to you.</div>
+          {% endfor %}
+        </div>
+
+        <div class="activity-card">
+          <h3>Service Requests</h3>
+          {% for request_item in recent_service_requests %}
+            <a class="activity-row" href="{% url 'services:services_home' %}">
+              <span class="activity-title">{{ request_item.service.name }}</span>
+              <span class="activity-meta">{{ request_item.get_status_display }} · {{ request_item.requested_at|date:"M d" }}</span>
+            </a>
+          {% empty %}
+            <div class="empty-state">No recent service requests.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Modules</h2>
+        <span class="muted">Core workspace</span>
+      </div>
+      <div class="module-grid">
+        {% for module in modules %}
+          <a class="module-card" href="{{ module.url }}">
+            <i class="bi {{ module.icon }}"></i>
+            <strong>{{ module.name }}</strong>
+            <span>{{ module.desc }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
   </div>
 
-  <div class="grid">
-    <div class="card" style="grid-column: span 6">
-    {% comment %} <a class="card" style="grid-column: span 6;" href="/crm/"> {% endcomment %}
-      <a href="{% url 'crm:index' %}"><h2 style="margin:0 0 6px 0;"><i class="bi bi-clipboard"></i> CRM</h2><a>
-      <div class="muted"><a href="{% url 'crm:create_contact' %}">Create Contact</a> + Tasks</div>
+  <aside class="side-column">
+    <section class="panel">
+      <h2>Quick Actions</h2>
+      <div class="quick-actions">
+        {% for action in quick_actions %}
+          <a href="{{ action.url }}"><i class="bi {{ action.icon }}"></i> {{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </section>
 
-    {% comment %} </a> {% endcomment %}
-    </div>  
+    <section class="panel">
+      <h2>Recent Invoices</h2>
+      {% for invoice in recent_invoices %}
+        <a class="activity-row" href="{% url 'billing:invoice_detail' invoice.id %}">
+          <span class="activity-title">Invoice #{{ invoice.id }}</span>
+          <span class="activity-meta">{{ invoice.status }} · ${{ invoice.total }}</span>
+        </a>
+      {% empty %}
+        <div class="empty-state">No invoices yet.</div>
+      {% endfor %}
+    </section>
+  </aside>
+</section>
 
-    <a class="card" style="grid-column: span 6;" href="{% url 'services:services_home'  %}">
-      <h2 style="margin:0 0 6px 0;"><i class="bi bi-bag"></i> Services</h2>
-      <div class="muted">Service catalog + Requests</div>
-    </a>
+<style>
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
 
-    <a class="card" style="grid-column: span 6;" href="/scheduling/">
-      <h2 style="margin:0 0 6px 0;"><i class="bi bi-calendar"></i> Scheduling</h2>
-      <div class="muted">Meetings + Participants</div>
-    </a>
+.eyebrow {
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
 
-    <a class="card" style="grid-column: span 6;" href="/billing/invoices/">
-      <h2 style="margin:0 0 6px 0;"><i class="bi bi-receipt"></i> Billing</h2>
-      <div class="muted">Invoices + Line Items</div>
-    </a>
-  </div>
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  margin: 8px 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.stat-card,
+.panel,
+.module-card {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  background: #2c2c3a;
+}
+
+.stat-card {
+  padding: 16px;
+}
+
+.stat-card span {
+  display: block;
+  color: rgba(230,232,238,.72);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.stat-card strong {
+  font-size: 30px;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.main-column,
+.side-column {
+  display: grid;
+  gap: 16px;
+}
+
+.panel {
+  padding: 18px;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.activity-card {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  background: #1f1f2e;
+  padding: 14px;
+}
+
+.activity-card h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.activity-row {
+  display: block;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.activity-card .activity-row:first-of-type,
+.side-column .activity-row:first-of-type {
+  border-top: 0;
+}
+
+.activity-title {
+  display: block;
+  font-weight: 700;
+}
+
+.activity-meta,
+.empty-state {
+  display: block;
+  color: rgba(230,232,238,.68);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.module-card {
+  padding: 16px;
+}
+
+.module-card:hover,
+.quick-actions a:hover,
+.activity-row:hover {
+  background: rgba(79,124,255,.08);
+}
+
+.module-card i {
+  color: #7dd3fc;
+  font-size: 24px;
+}
+
+.module-card strong,
+.module-card span {
+  display: block;
+}
+
+.module-card strong {
+  margin-top: 12px;
+}
+
+.module-card span {
+  margin-top: 6px;
+  color: rgba(230,232,238,.70);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.quick-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.quick-actions a {
+  padding: 12px;
+  border-radius: 8px;
+  background: #1f1f2e;
+  border: 1px solid rgba(255,255,255,.08);
+  font-weight: 700;
+}
+
+.quick-actions i {
+  color: #7dd3fc;
+  margin-right: 8px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout,
+  .activity-grid,
+  .module-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header {
+    display: block;
+  }
+
+  .header-actions {
+    margin-top: 14px;
+  }
+}
+</style>
 {% endblock %}

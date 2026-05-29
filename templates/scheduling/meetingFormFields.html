@@ -1,0 +1,65 @@
+<form method="post" class="update-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="update_meeting">
+    <input type="hidden" name="meeting_id" value="{{ meeting.id }}">
+
+    <label class="form-label" for="title_{{ meeting.id }}">Title</label>
+    <input id="title_{{ meeting.id }}" type="text" name="title" value="{{ meeting.title }}" class="form-input" required>
+
+    <label class="form-label" for="description_{{ meeting.id }}">Description</label>
+    <textarea id="description_{{ meeting.id }}" name="description" rows="3" class="form-input">{{ meeting.description }}</textarea>
+
+    <label class="form-label" for="location_{{ meeting.id }}">Location</label>
+    <input id="location_{{ meeting.id }}" type="text" name="location" value="{{ meeting.location|default_if_none:'' }}" class="form-input">
+
+    <label class="form-label" for="status_{{ meeting.id }}">Status</label>
+    <select id="status_{{ meeting.id }}" name="status" class="form-input">
+        <option value="ACTIVE" {% if meeting.status == "REQUESTED" or meeting.status == "ACTIVE" %}selected{% endif %}>Active</option>
+        <option value="FINISHED" {% if meeting.status == "FINISHED" %}selected{% endif %}>Finished</option>
+        <option value="CANCELED" {% if meeting.status == "CANCELED" %}selected{% endif %}>Canceled</option>
+    </select>
+
+    <label class="form-label" for="start_at_{{ meeting.id }}">Start</label>
+    <input id="start_at_{{ meeting.id }}" type="datetime-local" name="start_at" value="{{ meeting.start_at|date:'Y-m-d\\TH:i' }}" class="form-input" required>
+
+    <label class="form-label" for="end_at_{{ meeting.id }}">End</label>
+    <input id="end_at_{{ meeting.id }}" type="datetime-local" name="end_at" value="{{ meeting.end_at|date:'Y-m-d\\TH:i' }}" class="form-input" required>
+
+    <label class="form-label" for="notes_edit_{{ meeting.id }}">Internal Notes</label>
+    <textarea id="notes_edit_{{ meeting.id }}" name="notes" rows="3" class="form-input">{{ meeting.notes }}</textarea>
+
+    <div class="participants-list">
+        <label class="form-label">Participants</label>
+        {% for membership in company.memberships.all %}
+            <label>
+                <input type="checkbox" name="participants" value="{{ membership.user.id }}"
+                    {% for participant in meeting.participants.all %}
+                        {% if participant.user_id == membership.user.id %}checked{% endif %}
+                    {% endfor %}
+                >
+                {{ membership.user.get_full_name|default:membership.user.username }} ({{ membership.get_role_display }})
+            </label>
+        {% endfor %}
+    </div>
+
+    <label class="checkbox-row">
+        <input type="checkbox" name="is_billable" class="billable-toggle" {% if meeting.is_billable %}checked{% endif %}>
+        Billable
+    </label>
+
+    <div class="billable-fields">
+        <label class="form-label" for="billing_type_{{ meeting.id }}">Billing Type</label>
+        <select id="billing_type_{{ meeting.id }}" name="billing_type" class="form-input">
+            <option value="HOURLY" {% if meeting.billing_type == "HOURLY" %}selected{% endif %}>Hourly</option>
+            <option value="FLAT" {% if meeting.billing_type == "FLAT" %}selected{% endif %}>Flat fee</option>
+        </select>
+
+        <label class="form-label" for="bill_rate_cents_{{ meeting.id }}">Billing Rate Cents</label>
+        <input id="bill_rate_cents_{{ meeting.id }}" type="number" name="bill_rate_cents" value="{{ meeting.bill_rate_cents|default_if_none:'' }}" class="form-input">
+
+        <label class="form-label" for="billable_minutes_override_{{ meeting.id }}">Billable Minutes Override</label>
+        <input id="billable_minutes_override_{{ meeting.id }}" type="number" name="billable_minutes_override" value="{{ meeting.billable_minutes_override|default_if_none:'' }}" class="form-input">
+    </div>
+
+    <button type="submit" class="submit-button">{{ submit_label }}</button>
+</form>

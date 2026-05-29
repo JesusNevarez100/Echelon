@@ -2,46 +2,296 @@
 {% block title %}Echelon{% endblock %}
 
 {% block content %}
-  <div class="grid" style="align-items: start;">
-    <div class="card" style="grid-column: span 7;">
-      <h1 style="margin-top:0; font-size: 42px; line-height: 1.1;">
-        Echelon
-      </h1>
-      <p class="muted" style="font-size: 16px;">
-        A practical CRM that keeps client communication private by design.
-        Build services, track work, schedule meetings, and invoice clients.
-      </p>
+<section class="landing-hero">
+  <div class="eyebrow">Secure client operations platform</div>
+  <h1>Echelon</h1>
+  <p>
+    Manage contacts, service requests, private meetings, tasks, and invoices
+    from one role-aware CRM workspace.
+  </p>
+  <div class="hero-actions">
+    {% if user.is_authenticated %}
+      <a class="btn primary" href="/dashboard/">Open Dashboard</a>
+    {% else %}
+      <a class="btn primary" href="/accounts/login/">Sign In</a>
+    {% endif %}
+    <a class="btn" href="/admin/">Admin Console</a>
+  </div>
+</section>
 
-      <div class="row" style="margin-top: 18px;">
-        {% if user.is_authenticated %}
-          <a class="btn primary" href="/dashboard/">Go to Echelon</a>
-        {% else %}
-          <a class="btn primary" href="/accounts/login/">Login</a>
-        {% endif %}
-        <a class="btn" href="/admin/">Admin</a>
-      </div>
-
-      <div style="margin-top: 18px;" class="muted">
-        <strong>Core Modules:</strong>
-        CRM • Services • Billing • Scheduling
-      </div>
+<section class="product-preview" aria-label="Echelon workspace preview">
+  <div class="preview-sidebar">
+    <div class="preview-brand">ECHELON</div>
+    <div class="preview-nav active">Dashboard</div>
+    <div class="preview-nav">CRM</div>
+    <div class="preview-nav">Services</div>
+    <div class="preview-nav">Scheduling</div>
+    <div class="preview-nav">Billing</div>
+  </div>
+  <div class="preview-main">
+    <div class="preview-topline">
+      <span>Today</span>
+      <span class="preview-pill">Company scoped</span>
     </div>
-
-    <div class="card" style="grid-column: span 5;">
-      <h2 style="margin-top:0;">What you can do</h2>
-      <ul class="muted">
-        <li>Store and manage contacts + tasks</li>
-        <li>Create services clients can request</li>
-        <li>Track work and completion</li>
-        <li>Generate and manage invoices</li>
-        <li>Schedule meetings with clients</li>
-      </ul>
-
-      {% comment %} <div class="card" style="margin-top:16px;">
-        <div class="muted">
-          <strong>Security direction:</strong> messages/files stored as ciphertext only, with retention controls.
-        </div>
-      </div> {% endcomment %}
+    <div class="preview-stats">
+      <div><strong>12</strong><span>Open tasks</span></div>
+      <div><strong>4</strong><span>Meeting requests</span></div>
+      <div><strong>8</strong><span>Invoices</span></div>
+    </div>
+    <div class="preview-list">
+      <div><span class="dot green"></span> Client onboarding call accepted</div>
+      <div><span class="dot blue"></span> Website maintenance requested</div>
+      <div><span class="dot amber"></span> Draft invoice awaiting review</div>
     </div>
   </div>
+</section>
+
+<section class="feature-grid">
+  <article class="feature-card">
+    <i class="bi bi-people"></i>
+    <h2>Client Records</h2>
+    <p>Track contacts, tasks, and relationship history in a company-scoped workspace.</p>
+  </article>
+  <article class="feature-card">
+    <i class="bi bi-bag-check"></i>
+    <h2>Service Requests</h2>
+    <p>Publish service offerings and let clients request work through a controlled flow.</p>
+  </article>
+  <article class="feature-card">
+    <i class="bi bi-calendar2-week"></i>
+    <h2>Private Scheduling</h2>
+    <p>Keep meetings visible only to organizers, participants, and request reviewers.</p>
+  </article>
+  <article class="feature-card">
+    <i class="bi bi-receipt"></i>
+    <h2>Billing Ready</h2>
+    <p>Turn completed services and billable meetings into invoice-ready records.</p>
+  </article>
+</section>
+
+<section class="trust-band">
+  <div>
+    <strong>Role-based access</strong>
+    <span>Admin, manager, staff, and client views stay separated.</span>
+  </div>
+  <div>
+    <strong>Company isolation</strong>
+    <span>Data is scoped to the active company membership.</span>
+  </div>
+  <div>
+    <strong>Operational focus</strong>
+    <span>Designed around the daily work of managing clients.</span>
+  </div>
+</section>
+
+<style>
+.landing-hero {
+  padding: 36px 0 28px;
+}
+
+.eyebrow {
+  color: #7dd3fc;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.landing-hero h1 {
+  margin: 0;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.landing-hero p {
+  max-width: 720px;
+  color: rgba(230,232,238,.78);
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 18px 0 0;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.product-preview {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1f1f2e;
+  box-shadow: 0 24px 70px rgba(0,0,0,.28);
+}
+
+.preview-sidebar {
+  padding: 18px;
+  background: rgba(0,0,0,.22);
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+
+.preview-brand {
+  font-weight: 900;
+  margin-bottom: 18px;
+}
+
+.preview-nav {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: rgba(230,232,238,.72);
+  font-size: 14px;
+}
+
+.preview-nav.active {
+  color: #ffffff;
+  background: rgba(79,124,255,.20);
+}
+
+.preview-main {
+  padding: 22px;
+}
+
+.preview-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: rgba(230,232,238,.76);
+}
+
+.preview-pill {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.preview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.preview-stats div {
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.preview-stats strong {
+  display: block;
+  font-size: 28px;
+}
+
+.preview-stats span,
+.preview-list {
+  color: rgba(230,232,238,.72);
+  font-size: 14px;
+}
+
+.preview-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  margin-right: 8px;
+}
+
+.green { background: #22c55e; }
+.blue { background: #4f7cff; }
+.amber { background: #f59e0b; }
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.feature-card {
+  padding: 18px;
+  border-radius: 8px;
+  background: #2c2c3a;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.feature-card i {
+  color: #7dd3fc;
+  font-size: 24px;
+}
+
+.feature-card h2 {
+  font-size: 18px;
+  margin: 14px 0 8px;
+}
+
+.feature-card p {
+  margin: 0;
+  color: rgba(230,232,238,.72);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.trust-band {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-top: 24px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.trust-band div {
+  padding: 18px;
+  background: #1f1f2e;
+}
+
+.trust-band strong,
+.trust-band span {
+  display: block;
+}
+
+.trust-band span {
+  margin-top: 6px;
+  color: rgba(230,232,238,.72);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+@media (max-width: 860px) {
+  .product-preview,
+  .feature-grid,
+  .trust-band {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .preview-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero h1 {
+    font-size: 44px;
+  }
+}
+</style>
 {% endblock %}

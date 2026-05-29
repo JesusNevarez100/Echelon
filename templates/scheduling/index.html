@@ -1,148 +1,408 @@
 {% extends "base.html" %}
+{% block title %}Scheduling{% endblock %}
 
 {% block content %}
-
-<!-- FullCalendar (This displays the calendar) -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-<div id="calendar"></div>
-
-
-<!-- The modal for meeting creation -->
-
-<div id="createMeetingModal" class="custom-modal hidden">
-	<div class="custom-modal-content">
-		<span class="close-btn">&times;</span>
-
-		<h3>Create Meeting</h3>
-
-		<form id="meetingForm">
-			<label>Meeting Subject</label>
-			<input type="text" id="meetingTitle" required>
-
-			<label>Start Time</label>
-			<input type="datetime-local" id="meetingStart" required>
-
-			<label>End Time</label>
-			<input type="datetime-local" id="meetingEnd" required>
-
-			<label>Attendees</label>
-			<input type="text" id="meetingAttendees">
-
-			<button type="button" id="saveMeetingBtn">Save Meeting</button>
-		</form>
-	</div>
+<div class="schedule-header">
+    <div>
+        <h1>Scheduling</h1>
+        <p class="muted">Private meetings for {{ company.name }}</p>
+    </div>
+    <a href="{% url 'scheduling:create_meeting' %}" class="action-button request-button">
+        {% if can_request_meetings %}+ Request Meeting{% else %}+ Create Meeting{% endif %}
+    </a>
 </div>
 
-<!-- This is for how the modal displays -->
+<div class="schedule-stack">
+    <section class="card schedule-panel">
+        <h2>{% if can_update_meetings %}Pending Requests{% else %}My Requests{% endif %}</h2>
+        <div class="table-wrap">
+            {% if pending_meetings %}
+                <table class="services-table compact-table">
+                    <thead>
+                        <tr>
+                            <th>Meeting</th>
+                            <th>Requested By</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meeting in pending_meetings %}
+                            <tr>
+                                <td>
+                                    <strong>{{ meeting.title }}</strong>
+                                    {% if meeting.description %}
+                                        <div class="muted table-note">{{ meeting.description }}</div>
+                                    {% endif %}
+                                    <div class="muted table-note">{{ meeting.location|default:"No location requested" }}</div>
+                                    {% if meeting.notes %}
+                                        <div class="muted table-note">{{ meeting.notes }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ meeting.requested_by|default:"-" }}</td>
+                                <td>
+                                    {% if can_update_meetings %}
+                                        <div class="request-actions-row">
+                                            <details class="update-details">
+                                                <summary class="action-button update-button">Review</summary>
+                                                {% include "scheduling/meetingFormFields.html" with meeting=meeting submit_label="Accept Meeting" %}
+                                            </details>
+
+                                            <form method="post" style="margin:0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="deny_meeting">
+                                                <input type="hidden" name="meeting_id" value="{{ meeting.id }}">
+                                                <button type="submit" class="action-button delete-button">Deny</button>
+                                            </form>
+                                        </div>
+                                    {% else %}
+                                        <span class="status status-requested">Requested</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">
+                    {% if can_update_meetings %}
+                        No client meeting requests are waiting for review.
+                    {% else %}
+                        You have not requested any meetings.
+                    {% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="card schedule-panel">
+        <h2>Meetings</h2>
+        <div class="table-wrap">
+            {% if meetings %}
+                <table class="services-table compact-table">
+                    <thead>
+                        <tr>
+                            <th>Meeting</th>
+                            <th>When</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meeting in meetings %}
+                            <tr>
+                                <td>
+                                    <strong>{{ meeting.title }}</strong>
+                                    {% if meeting.description %}
+                                        <div class="muted table-note">{{ meeting.description }}</div>
+                                    {% endif %}
+                                    <div class="muted table-note">{{ meeting.location|default:"No location" }}</div>
+                                    <div class="muted table-note">
+                                        Organizer: {{ meeting.organizer|default:"-" }}
+                                    </div>
+                                    <div class="muted table-note">
+                                        Participants:
+                                        {% for participant in meeting.participants.all %}
+                                            {{ participant.user.get_full_name|default:participant.user.username }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                            None selected
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if meeting.start_at and meeting.end_at %}
+                                        {{ meeting.start_at|date:"m/d/y" }}<br>
+                                        <span class="muted">{{ meeting.start_at|date:"g:i A" }} - {{ meeting.end_at|date:"g:i A" }}</span>
+                                    {% else %}
+                                        <span class="muted">Not scheduled</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="status status-{{ meeting.status|lower }}">{{ meeting.get_status_display }}</span></td>
+                                <td>
+                                    {% if can_update_meetings %}
+                                        <div class="request-actions-row">
+                                            <details class="update-details">
+                                                <summary class="action-button update-button">Update</summary>
+                                                {% include "scheduling/meetingFormFields.html" with meeting=meeting submit_label="Save Changes" %}
+                                            </details>
+
+                                            <form method="post" style="margin:0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_meeting">
+                                                <input type="hidden" name="meeting_id" value="{{ meeting.id }}">
+                                                <button type="submit" class="action-button delete-button"><i class="bi bi-trash3"></i></button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">No scheduled meetings are visible to you yet.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="card schedule-panel calendar-panel">
+    <h2>Meeting Calendar</h2>
+    <div id="calendar"></div>
+</div>
 
 <style>
-	.custom-modal {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 9999;
-	}
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
 
-	.hidden {
-		display: none;
-	}
+.schedule-header h1,
+.schedule-panel h2 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.2;
+}
 
-	.custom-modal-content {
-		background: #0b1220;
-		padding: 20px;
-		border-radius: 8px;
-		width: 380px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-	}
+.schedule-header p {
+    margin: 6px 0 0;
+}
 
-	.custom-modal-content input {
-		width: 100%;
-		margin-bottom: 12px;
-		padding: 8px;
-	}
+.schedule-stack {
+    display: grid;
+    gap: 16px;
+}
 
-	.close-btn {
-		float: right;
-		font-size: 22px;
-		cursor: pointer;
-	}
+.schedule-panel {
+    padding: 20px;
+}
+
+.schedule-panel h2 {
+    margin-bottom: 16px;
+}
+
+.calendar-panel {
+    margin-top: 16px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 12px;
+}
+
+.action-button {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.request-button {
+    background: #4f7cff;
+    color: #ffffff;
+}
+
+.delete-button {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    color: #ffffff;
+}
+
+.update-button {
+    list-style: none;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(79,124,255,.6);
+    color: #e6e8ee;
+}
+
+.update-details {
+    min-width: 180px;
+}
+
+.update-details summary {
+    list-style: none;
+}
+
+.update-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.update-form {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    min-width: 280px;
+}
+
+.update-form textarea,
+.update-form select,
+.form-input {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: #1f1f2e;
+    color: #e6e8ee;
+    box-sizing: border-box;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #c9ced8;
+}
+
+.checkbox-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.checkbox-row input,
+.participants-list input {
+    width: auto;
+}
+
+.participants-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+    display: grid;
+    gap: 8px;
+}
+
+.participants-list label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+}
+
+.submit-button {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    background: #4f7cff;
+    color: white;
+}
+
+.request-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.table-note {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.status {
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.status-requested {
+    color: #8ca5d7;
+}
+
+.status-active,
+.status-finished {
+    color: #4fffc3;
+}
+
+.status-canceled {
+    color: #ff6b6b;
+}
+
+#calendar {
+    min-height: 620px;
+}
+
+.fc {
+    color: #e6e8ee;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 20px;
+}
+
+.fc .fc-button-primary {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.16);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+    border-color: rgba(255,255,255,.12);
+}
+
+@media (max-width: 680px) {
+    .schedule-header {
+        display: block;
+    }
+
+    .schedule-header .action-button {
+        margin-top: 12px;
+    }
+}
 </style>
 
-
-<!-- Modal calendar interaction (still doesn't display right) -->
-
 <script>
-	document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        const calendarEl = document.getElementById("calendar");
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth",
+            events: "{% url 'scheduling:meetings_json' %}",
+            eventTextColor: "#ffffff"
+        });
 
-		/* Modal logic */
-		const modal = document.getElementById("createMeetingModal");
-		const closeBtn = document.querySelector(".close-btn");
+        calendar.render();
 
-		function openModal() {
-			modal.classList.remove("hidden");
-		}
+        document.querySelectorAll(".update-form").forEach((form) => {
+            const toggle = form.querySelector(".billable-toggle");
+            const fields = form.querySelector(".billable-fields");
 
-		function closeModal() {
-			modal.classList.add("hidden");
-		}
+            if (!toggle || !fields) return;
 
-		closeBtn.onclick = closeModal;
+            function syncBillableFields() {
+                fields.hidden = !toggle.checked;
+            }
 
-		window.onclick = function (e) {
-			if (e.target === modal) closeModal();
-		};
-
-		/*FullCalendar Setup*/
-		const calendarEl = document.getElementById("calendar");
-
-		const calendar = new FullCalendar.Calendar(calendarEl, {
-			initialView: "dayGridMonth",
-			selectable: true,
-			events: "/scheduling/meetings/",
-
-			eventColor: "#8ca5d7",   // background color
-			eventTextColor: "#ffffff", // text color
-
-
-			select(info) {
-				document.getElementById("meetingStart").value = info.startStr + "T09:00";
-				document.getElementById("meetingEnd").value = info.endStr + "T10:00";
-				document.getElementById("meetingTitle").value = "";
-				document.getElementById("meetingAttendees").value = "";
-
-				openModal();
-			}
-		});
-
-		calendar.render();
-
-		/*Save Meeting (not fully working)*/
-		document.getElementById("saveMeetingBtn").addEventListener("click", function () {
-			const title = document.getElementById("meetingTitle").value;
-			const start = document.getElementById("meetingStart").value;
-			const end = document.getElementById("meetingEnd").value;
-			const attendees = document.getElementById("meetingAttendees").value;
-
-			fetch("/scheduling/create/", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ title, start, end, attendees }),
-			})
-				.then(res => res.json())
-				.then(data => {
-					if (data.status === "ok") {
-						calendar.refetchEvents();
-						closeModal();
-					}
-				});
-		});
-
-	});
+            toggle.addEventListener("change", syncBillableFields);
+            syncBillableFields();
+        });
+    });
 </script>
-
 {% endblock %}
