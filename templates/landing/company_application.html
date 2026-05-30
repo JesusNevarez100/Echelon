@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block title %}Apply for Echelon{% endblock %}
+
+{% block content %}
+<section class="application-header">
+  <div>
+    <div class="eyebrow">Company access request</div>
+    <h1>Apply for your company</h1>
+    <p>
+      Tell us about your organization and how your team plans to use Echelon.
+      Applications are reviewed before a company workspace is created.
+    </p>
+  </div>
+  <a class="btn" href="{% url 'landing:landing' %}">Back to Home</a>
+</section>
+
+{% if submitted %}
+  <div class="success-panel">
+    <i class="bi bi-check-circle"></i>
+    <div>
+      <strong>Application submitted</strong>
+      <p>Thanks. Your company application is now in the review queue.</p>
+    </div>
+  </div>
+{% endif %}
+
+<div class="application-layout">
+  <section class="card application-card">
+    <form method="post" class="application-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="error form-wide">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="form-section form-wide">
+        <h2>Company</h2>
+      </div>
+
+      {% for field in form %}
+        {% if field.name == "applicant_name" %}
+          <div class="form-section form-wide">
+            <h2>Primary contact</h2>
+          </div>
+        {% elif field.name == "use_case" %}
+          <div class="form-section form-wide">
+            <h2>Use case</h2>
+          </div>
+        {% endif %}
+
+        <div class="form-field {% if field.name == 'use_case' %}form-wide{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="error">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="form-actions form-wide">
+        <button class="btn primary" type="submit">Submit Application</button>
+        <a class="btn" href="{% url 'landing:landing' %}">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+  <aside class="card review-card">
+    <h2>What happens next?</h2>
+    <div class="review-step">
+      <span>01</span>
+      <div><strong>Submit</strong><p>Your application is added to the review queue.</p></div>
+    </div>
+    <div class="review-step">
+      <span>02</span>
+      <div><strong>Review</strong><p>An administrator reviews the company and use case.</p></div>
+    </div>
+    <div class="review-step">
+      <span>03</span>
+      <div><strong>Workspace</strong><p>If approved, a company workspace can be created.</p></div>
+    </div>
+  </aside>
+</div>
+
+<style>
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.application-header h1 {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.application-header p {
+  max-width: 700px;
+  margin: 12px 0 0;
+  color: rgba(230,232,238,.74);
+  line-height: 1.6;
+}
+
+.success-panel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(34,197,94,.35);
+  background: rgba(34,197,94,.10);
+  margin-bottom: 18px;
+}
+
+.success-panel i {
+  color: #86efac;
+  font-size: 24px;
+}
+
+.success-panel strong,
+.success-panel p {
+  display: block;
+}
+
+.success-panel p {
+  margin: 4px 0 0;
+  color: rgba(230,232,238,.74);
+}
+
+.application-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.application-card,
+.review-card {
+  padding: 22px;
+}
+
+.application-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-wide,
+.form-section {
+  grid-column: 1 / -1;
+}
+
+.form-section h2,
+.review-card h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.form-section {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.form-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 6px;
+  color: #c9ced8;
+  font-weight: 700;
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.03);
+  color: #e6e8ee;
+}
+
+textarea.form-input {
+  resize: vertical;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4f7cff;
+  background: rgba(79,124,255,.05);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.review-card {
+  background: #1f1f2e;
+}
+
+.review-step {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.review-step span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(79,124,255,.18);
+  color: #9db7ff;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.review-step strong {
+  display: block;
+}
+
+.review-step p {
+  margin: 4px 0 0;
+  color: rgba(230,232,238,.72);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+button {
+  border: 0;
+}
+
+@media (max-width: 860px) {
+  .application-header {
+    display: block;
+  }
+
+  .application-header .btn {
+    margin-top: 14px;
+  }
+
+  .application-layout,
+  .application-form {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}

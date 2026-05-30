@@ -15,6 +15,7 @@
     {% else %}
       <a class="btn primary" href="/accounts/login/">Sign In</a>
     {% endif %}
+    <a class="btn" href="{% url 'landing:company_application' %}">Apply for Company Access</a>
     <a class="btn" href="/admin/">Admin Console</a>
   </div>
 </section>
@@ -189,6 +190,7 @@
   {% else %}
     <a class="btn primary" href="/accounts/login/">Sign In</a>
   {% endif %}
+  <a class="btn" href="{% url 'landing:company_application' %}">Apply for Access</a>
 </section>
 
 <style>

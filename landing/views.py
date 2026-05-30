@@ -11,10 +11,29 @@ from services.models import Service, ServiceRequest
 from scheduling.models import Meeting
 from crm.models import Task, Contact
 from billing.models import Invoice
+from .forms import CompanyApplicationForm
 
 
 def landing(request):
     return render(request, "landing/landing.html")
+
+
+def company_application(request):
+    submitted = False
+
+    if request.method == "POST":
+        form = CompanyApplicationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            submitted = True
+            form = CompanyApplicationForm()
+    else:
+        form = CompanyApplicationForm()
+
+    return render(request, "landing/company_application.html", {
+        "form": form,
+        "submitted": submitted,
+    })
 
 #This code manages the functionality of the blocks
 @login_required
