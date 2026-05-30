@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Send Feedback{% endblock %}
+
+{% block content %}
+<section class="feedback-header">
+  <div>
+    <div class="eyebrow">Pre-alpha feedback</div>
+    <h1>Send Feedback</h1>
+    <p>
+      Report bugs, confusing flows, design issues, or missing features. Your feedback
+      helps us decide what to fix before Echelon moves beyond pre-alpha.
+    </p>
+  </div>
+  <a class="btn" href="{% url 'landing:dashboard' %}">Back to Dashboard</a>
+</section>
+
+{% if submitted %}
+  <div class="success-panel">
+    <i class="bi bi-check-circle"></i>
+    <div>
+      <strong>Feedback submitted</strong>
+      <p>Thank you. Your note has been added to the tester feedback queue.</p>
+    </div>
+  </div>
+{% endif %}
+
+<div class="feedback-layout">
+  <section class="card feedback-card">
+    <form method="post" class="feedback-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="error form-wide">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="form-field {% if field.name == 'message' %}form-wide{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="error">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="form-actions form-wide">
+        <button class="btn primary" type="submit">Submit Feedback</button>
+        <a class="btn" href="{% url 'landing:dashboard' %}">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+  <aside class="card feedback-guide">
+    <h2>Useful feedback includes</h2>
+    <ul class="muted">
+      <li>What you were trying to do</li>
+      <li>What you expected to happen</li>
+      <li>What actually happened</li>
+      <li>The page or module where it occurred</li>
+    </ul>
+    <div class="guide-note">
+      Short notes are fine. A precise bug report beats a perfect essay.
+    </div>
+  </aside>
+</div>
+
+<style>
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.feedback-header h1 {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.feedback-header p {
+  max-width: 700px;
+  margin: 12px 0 0;
+  color: rgba(230,232,238,.74);
+  line-height: 1.6;
+}
+
+.success-panel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(34,197,94,.35);
+  background: rgba(34,197,94,.10);
+  margin-bottom: 18px;
+}
+
+.success-panel i {
+  color: #86efac;
+  font-size: 24px;
+}
+
+.success-panel p {
+  margin: 4px 0 0;
+  color: rgba(230,232,238,.74);
+}
+
+.feedback-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.feedback-card,
+.feedback-guide {
+  padding: 22px;
+}
+
+.feedback-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-wide {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 6px;
+  color: #c9ced8;
+  font-weight: 700;
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.03);
+  color: #e6e8ee;
+}
+
+textarea.form-input {
+  resize: vertical;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4f7cff;
+  background: rgba(79,124,255,.05);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feedback-guide {
+  background: #1f1f2e;
+}
+
+.feedback-guide h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.feedback-guide ul {
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.guide-note {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(230,232,238,.74);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+button {
+  border: 0;
+}
+
+@media (max-width: 860px) {
+  .feedback-header {
+    display: block;
+  }
+
+  .feedback-header .btn {
+    margin-top: 14px;
+  }
+
+  .feedback-layout,
+  .feedback-form {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}

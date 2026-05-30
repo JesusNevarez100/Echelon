@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 
-from .models import CompanyApplication
+from .models import CompanyApplication, TesterFeedback
 
 
 @admin.register(CompanyApplication)
@@ -30,5 +30,32 @@ class CompanyApplicationAdmin(admin.ModelAdmin):
             CompanyApplication.Status.APPROVED,
             CompanyApplication.Status.DENIED,
         } and obj.reviewed_at is None:
+            obj.reviewed_at = timezone.now()
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(TesterFeedback)
+class TesterFeedbackAdmin(admin.ModelAdmin):
+    list_display = ("feedback_type", "module", "status", "submitted_by", "name", "email", "created_at")
+    list_filter = ("feedback_type", "status", "module", "created_at")
+    search_fields = ("message", "module", "page_url", "name", "email", "submitted_by__username")
+    readonly_fields = ("created_at",)
+    fieldsets = (
+        ("Reporter", {
+            "fields": ("submitted_by", "name", "email"),
+        }),
+        ("Feedback", {
+            "fields": ("feedback_type", "module", "page_url", "message"),
+        }),
+        ("Review", {
+            "fields": ("status", "reviewed_at", "internal_notes"),
+        }),
+        ("Audit", {
+            "fields": ("created_at",),
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        if change and "status" in form.changed_data and obj.status != TesterFeedback.Status.NEW and obj.reviewed_at is None:
             obj.reviewed_at = timezone.now()
         super().save_model(request, obj, form, change)

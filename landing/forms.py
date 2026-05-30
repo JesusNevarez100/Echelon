@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import CompanyApplication
+from .models import CompanyApplication, TesterFeedback
 
 
 class CompanyApplicationForm(forms.ModelForm):
@@ -33,5 +33,44 @@ class CompanyApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "form-input")
+
+
+class TesterFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = TesterFeedback
+        fields = [
+            "name",
+            "email",
+            "feedback_type",
+            "module",
+            "page_url",
+            "message",
+        ]
+        widgets = {
+            "message": forms.Textarea(attrs={"rows": 6}),
+        }
+        labels = {
+            "feedback_type": "Feedback type",
+            "page_url": "Page or URL",
+            "message": "What happened?",
+        }
+
+    def __init__(self, *args, user=None, initial_url="", **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if initial_url and not self.initial.get("page_url"):
+            self.initial["page_url"] = initial_url
+
+        if user and user.is_authenticated:
+            full_name = user.get_full_name()
+            if full_name and not self.initial.get("name"):
+                self.initial["name"] = full_name
+            if user.email and not self.initial.get("email"):
+                self.initial["email"] = user.email
+
+        self.fields["module"].widget.attrs.setdefault("placeholder", "Scheduling, Services, Dashboard, etc.")
+
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "form-input")

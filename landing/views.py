@@ -11,7 +11,7 @@ from services.models import Service, ServiceRequest
 from scheduling.models import Meeting
 from crm.models import Task, Contact
 from billing.models import Invoice
-from .forms import CompanyApplicationForm
+from .forms import CompanyApplicationForm, TesterFeedbackForm
 
 
 def landing(request):
@@ -31,6 +31,28 @@ def company_application(request):
         form = CompanyApplicationForm()
 
     return render(request, "landing/company_application.html", {
+        "form": form,
+        "submitted": submitted,
+    })
+
+
+def tester_feedback(request):
+    submitted = False
+    initial_url = request.GET.get("page", "")
+
+    if request.method == "POST":
+        form = TesterFeedbackForm(request.POST, user=request.user, initial_url=initial_url)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            if request.user.is_authenticated:
+                feedback.submitted_by = request.user
+            feedback.save()
+            submitted = True
+            form = TesterFeedbackForm(user=request.user)
+    else:
+        form = TesterFeedbackForm(user=request.user, initial_url=initial_url)
+
+    return render(request, "landing/tester_feedback.html", {
         "form": form,
         "submitted": submitted,
     })
